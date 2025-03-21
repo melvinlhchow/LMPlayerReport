@@ -252,6 +252,70 @@
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">If not provided, a default club logo will be used.</p>
                 </div>
 
+				<!-- Height Growth Data Section -->
+				<div class="mb-6 mt-6">
+					<div class="flex justify-between items-center">
+						<h3 class="font-medium text-lg">Height Growth Data</h3>
+						<button type="button" id="toggle-height-growth" class="text-sm text-primary hover:text-secondary">
+							<span id="toggle-height-growth-text">Show Section</span>
+						</button>
+					</div>
+					<div id="height-growth-section" class="mt-3 hidden">
+						<div class="bg-white dark:bg-gray-700 p-4 rounded-md mb-4">
+							<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+								<div>
+									<label for="height-start-month" class="block text-sm font-medium mb-1">Start Month</label>
+									<select id="height-start-month" class="w-full rounded-md border-gray-300 shadow-sm p-2 bg-white dark:bg-gray-700">
+										<option value="0">January</option>
+										<option value="1">February</option>
+										<option value="2">March</option>
+										<option value="3">April</option>
+										<option value="4">May</option>
+										<option value="5">June</option>
+										<option value="6">July</option>
+										<option value="7">August</option>
+										<option value="8">September</option>
+										<option value="9">October</option>
+										<option value="10">November</option>
+										<option value="11">December</option>
+									</select>
+								</div>
+								<div>
+									<label for="height-end-month" class="block text-sm font-medium mb-1">End Month</label>
+									<select id="height-end-month" class="w-full rounded-md border-gray-300 shadow-sm p-2 bg-white dark:bg-gray-700">
+										<option value="0">January</option>
+										<option value="1">February</option>
+										<option value="2">March</option>
+										<option value="3">April</option>
+										<option value="4">May</option>
+										<option value="5" selected>June</option>
+										<option value="6">July</option>
+										<option value="7">August</option>
+										<option value="8">September</option>
+										<option value="9">October</option>
+										<option value="10">November</option>
+										<option value="11">December</option>
+									</select>
+								</div>
+								<div>
+									<label for="height-year" class="block text-sm font-medium mb-1">Year</label>
+									<select id="height-year" class="w-full rounded-md border-gray-300 shadow-sm p-2 bg-white dark:bg-gray-700">
+										<!-- Years will be dynamically populated -->
+									</select>
+								</div>
+							</div>
+							<p class="mb-4 text-xs text-gray-500 dark:text-gray-400">Select the start and end months, and the year for the height tracking period.</p>
+							<div id="height-growth-inputs" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+								<!-- Month inputs will be dynamically generated -->
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+
+
+
                 <!-- Attendance Data Section -->
                 <div class="mb-6 mt-6">
                     <div class="flex justify-between items-center">
@@ -567,13 +631,16 @@
         </svg>
     `;
 
-    // Global variables
-    let clubLogoData = null;
-    let currentReportHTML = "";
-    let playersData = [];
-    let selectedPlayerData = null;
-    let portraitImageData = null;
-    let savedReports = [];
+	// Global variables
+	let clubLogoData = null;
+	let currentReportHTML = "";
+	let playersData = [];
+	let selectedPlayerData = null;
+	let portraitImageData = null;
+	let savedReports = [];
+	let currentHeightGrowthData = []; // Store height growth data
+	let currentTotalGrowth = 0; // Store total growth
+
 
     // DOM elements
     const manualPlayerDataRadio = document.getElementById('manual-player-data');
@@ -658,6 +725,84 @@
             attendanceManualInput.classList.add('hidden');
         }
     });
+
+	// Height Growth Section Toggle
+	const toggleHeightGrowthBtn = document.getElementById('toggle-height-growth');
+	const toggleHeightGrowthText = document.getElementById('toggle-height-growth-text');
+	const heightGrowthSection = document.getElementById('height-growth-section');
+	toggleHeightGrowthBtn.addEventListener('click', () => {
+		heightGrowthSection.classList.toggle('hidden');
+		toggleHeightGrowthText.textContent = heightGrowthSection.classList.contains('hidden') ? 'Show Section' : 'Hide Section';
+	});
+
+	// Populate the year dropdown with a range of years (2022 to current year)
+	const heightYearSelect = document.getElementById('height-year');
+	const currentYear = new Date().getFullYear();
+	for (let year = 2022; year <= currentYear; year++) {
+		const option = document.createElement('option');
+		option.value = year;
+		option.textContent = year;
+		if (year === currentYear) option.selected = true;
+		heightYearSelect.appendChild(option);
+	}
+
+	// Dynamically generate height input fields based on selected month range
+	const heightStartMonthSelect = document.getElementById('height-start-month');
+	const heightEndMonthSelect = document.getElementById('height-end-month');
+	const heightGrowthInputsDiv = document.getElementById('height-growth-inputs');
+
+	function generateHeightInputs(startMonth, endMonth) {
+		heightGrowthInputsDiv.innerHTML = ''; // Clear existing inputs
+		const months = [
+			'January', 'February', 'March', 'April', 'May', 'June',
+			'July', 'August', 'September', 'October', 'November', 'December'
+		];
+		
+		// Handle cases where endMonth is less than startMonth (e.g., November to February)
+		let monthRange = [];
+		if (endMonth >= startMonth) {
+			for (let i = startMonth; i <= endMonth; i++) {
+				monthRange.push(i);
+			}
+		} else {
+			// If endMonth < startMonth, wrap around the year
+			for (let i = startMonth; i < 12; i++) {
+				monthRange.push(i);
+			}
+			for (let i = 0; i <= endMonth; i++) {
+				monthRange.push(i);
+			}
+		}
+
+		monthRange.forEach((monthIndex) => {
+			const month = months[monthIndex];
+			const inputDiv = document.createElement('div');
+			inputDiv.innerHTML = `
+				<label class="block text-sm mb-1" for="height-${month.toLowerCase()}">${month}</label>
+				<input type="number" min="0" step="0.1" id="height-${month.toLowerCase()}" class="w-full rounded-md border-gray-300 shadow-sm p-2 bg-white dark:bg-gray-600 text-base" placeholder="Height in cm" value="">
+			`;
+			heightGrowthInputsDiv.appendChild(inputDiv);
+		});
+	}
+
+	// Initialize with default range (January to June)
+	generateHeightInputs(parseInt(heightStartMonthSelect.value), parseInt(heightEndMonthSelect.value));
+
+	// Update inputs when the start or end month changes
+	heightStartMonthSelect.addEventListener('change', () => {
+		const startMonth = parseInt(heightStartMonthSelect.value);
+		const endMonth = parseInt(heightEndMonthSelect.value);
+		generateHeightInputs(startMonth, endMonth);
+	});
+
+	heightEndMonthSelect.addEventListener('change', () => {
+		const startMonth = parseInt(heightStartMonthSelect.value);
+		const endMonth = parseInt(heightEndMonthSelect.value);
+		generateHeightInputs(startMonth, endMonth);
+	});
+
+
+
 
     const attendanceFileInput = document.getElementById('attendanceFile');
     attendanceFileInput.addEventListener('change', async (e) => {
@@ -784,46 +929,55 @@
     });
 
     resetBtn.addEventListener('click', () => {
-        manualFirstName.value = '';
-        manualLastName.value = '';
-        manualDob.value = '';
-        manualPosition.value = '';
-        sliders.forEach(id => {
-            const slider = document.getElementById(id);
-            const valueDisplay = document.getElementById(`${id}-value`);
-            slider.value = 3;
-            valueDisplay.textContent = 3;
-        });
-        document.getElementById('total-training-sessions').value = 0;
-        document.getElementById('training-sessions-attended').value = 0;
-        document.getElementById('total-training-minutes').value = 0;
-        document.getElementById('total-matches').value = 0;
-        document.getElementById('matches-played').value = 0;
-        document.getElementById('total-match-minutes').value = 0;
-        document.getElementById('match-minutes-played').value = 0;
-        document.getElementById('targeted-feedback').value = '';
-        document.getElementById('areas-improvement').value = '';
-        document.getElementById('coach1-name').value = 'Melvin Chow';
-        document.getElementById('coach1-title').value = 'Coach';
-        document.getElementById('coach2-name').value = 'Lee Hong Lim';
-        document.getElementById('coach2-title').value = 'Coach';
-        document.getElementById('technical-director').value = 'Darren Bowman';
-        document.getElementById('technical-director-title').value = 'Technical Director';
-        document.getElementById('current-grade').value = 'A';
-        document.getElementById('target-grade').value = 'A';
-        portraitImageData = null;
-        clubLogoData = null;
-        portraitFileInput.value = '';
-        clubLogoFileInput.value = '';
-        if (filePlayerDataRadio.checked) {
-            selectedPlayerData = null;
-            playerSelect.value = '';
-        }
-        reportPreview.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-12">Your report preview will appear here.</div>';
-        pdfControls.classList.add('hidden');
-        showStatus('Form reset successfully.', 'success');
+    manualFirstName.value = '';
+    manualLastName.value = '';
+    manualDob.value = '';
+    manualPosition.value = '';
+    sliders.forEach(id => {
+        const slider = document.getElementById(id);
+        const valueDisplay = document.getElementById(`${id}-value`);
+        slider.value = 3;
+        valueDisplay.textContent = 3;
     });
-
+    document.getElementById('total-training-sessions').value = 0;
+    document.getElementById('training-sessions-attended').value = 0;
+    document.getElementById('total-training-minutes').value = 0;
+    document.getElementById('total-matches').value = 0;
+    document.getElementById('matches-played').value = 0;
+    document.getElementById('total-match-minutes').value = 0;
+    document.getElementById('match-minutes-played').value = 0;
+    document.getElementById('targeted-feedback').value = '';
+    document.getElementById('areas-improvement').value = '';
+    document.getElementById('coach1-name').value = 'Melvin Chow';
+    document.getElementById('coach1-title').value = 'Coach';
+    document.getElementById('coach2-name').value = 'Lee Hong Lim';
+    document.getElementById('coach2-title').value = 'Coach';
+    document.getElementById('technical-director').value = 'Darren Bowman';
+    document.getElementById('technical-director-title').value = 'Technical Director';
+    document.getElementById('current-grade').value = 'A';
+    document.getElementById('target-grade').value = 'A';
+    portraitImageData = null;
+    clubLogoData = null;
+    portraitFileInput.value = '';
+    clubLogoFileInput.value = '';
+    if (filePlayerDataRadio.checked) {
+        selectedPlayerData = null;
+        playerSelect.value = '';
+    }
+    reportPreview.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-12">Your report preview will appear here.</div>';
+    pdfControls.classList.add('hidden');
+    // Reset height growth inputs
+    document.getElementById('height-start-month').value = '0'; // Reset to January
+    document.getElementById('height-end-month').value = '5'; // Reset to June
+    document.getElementById('height-year').value = currentYear; // Reset to current year
+    generateHeightInputs(0, 5); // Regenerate inputs for January to June
+    const heightInputs = heightGrowthInputsDiv.querySelectorAll('input');
+    heightInputs.forEach(input => input.value = '');
+    // Reset height growth global variables
+    currentHeightGrowthData = [];
+    currentTotalGrowth = 0;
+    showStatus('Form reset successfully.', 'success');
+	});	
 
 printBtn.addEventListener('click', () => {
     if (!currentReportHTML) {
@@ -1048,13 +1202,13 @@ printBtn.addEventListener('click', () => {
                     
                     /* Grades */
                     .grade {
-                        display: block; /* Change to block to take full width */
-                        width: 100%; /* Stretch across the parent container */
-                        height: auto; /* Remove fixed height */
-                        padding: 8px; /* Add padding for spacing */
-                        text-align: center; /* Center the text */
+                        display: block;
+                        width: 100%;
+                        height: auto;
+                        padding: 8px;
+                        text-align: center;
                         font-weight: bold;
-						font-size: 20px;
+                        font-size: 20px;
                         border-radius: 4px;
                     }
                     
@@ -1288,6 +1442,30 @@ printBtn.addEventListener('click', () => {
             signatures.push({ name, title });
         });
         
+        // Use the globally stored height growth data
+        const heightYear = parseInt(document.getElementById('height-year').value);
+        const heightGrowthData = currentHeightGrowthData; // Use the stored data
+        const totalGrowthPrint = currentTotalGrowth !== 0 ? `${currentTotalGrowth > 0 ? '+' : ''}${currentTotalGrowth} cm` : '';
+        let expectedMonthCount = 1; // Default to 1 to avoid colspan="0"
+
+        // Calculate expected month count for colspan when there's no data
+        const startMonth = parseInt(document.getElementById('height-start-month').value);
+        const endMonth = parseInt(document.getElementById('height-end-month').value);
+        let monthRange = [];
+        if (endMonth >= startMonth) {
+            for (let i = startMonth; i <= endMonth; i++) {
+                monthRange.push(i);
+            }
+        } else {
+            for (let i = startMonth; i < 12; i++) {
+                monthRange.push(i);
+            }
+            for (let i = 0; i <= endMonth; i++) {
+                monthRange.push(i);
+            }
+        }
+        expectedMonthCount = monthRange.length || 1;
+        
         const reportHtml = `
             <div class="header">
                 <div class="logo">${logoHtml}</div>
@@ -1302,6 +1480,38 @@ printBtn.addEventListener('click', () => {
                     <div class="player-meta">Review Date: ${reviewDate}</div>
                 </div>
                 <div class="player-photo">${portraitHtml}</div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Height Growth Over Season (${heightYear})</div>
+                <div class="box">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <th style="padding: 8px; text-align: left;">Month</th>
+                                ${heightGrowthData.map(data => `
+                                    <th style="padding: 8px; text-align: left;">${data.month}</th>
+                                `).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <td style="padding: 8px;">Height (cm)</td>
+                                ${heightGrowthData.length > 0 ? heightGrowthData.map(data => `
+                                    <td style="padding: 8px;">${data.height}</td>
+                                `).join('') : `
+                                    <td colspan="${expectedMonthCount}" style="padding: 8px; text-align: center; color: #666;">No height data available.</td>
+                                `}
+                            </tr>
+                            ${heightGrowthData.length > 1 && totalGrowthPrint ? `
+                                <tr style="font-weight: bold; color: #FFD700;">
+                                    <td style="padding: 8px;">Total Growth:</td>
+                                    <td colspan="${heightGrowthData.length}" style="padding: 8px;">${totalGrowthPrint}</td>
+                                </tr>
+                            ` : ''}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             
             <div class="section">
@@ -1471,14 +1681,18 @@ printBtn.addEventListener('click', () => {
         reportDiv.innerHTML = reportHtml;
         printWindow.document.close();
         
+        // Add error handling for the print window
+        printWindow.onerror = (message, source, lineno, colno, error) => {
+            console.error('Print window error:', message, 'at', source, 'line', lineno, 'column', colno, 'Error object:', error);
+            showStatus('Error in print window: ' + message, 'error');
+        };
+        
         showStatus('Print window opened. Use browser print dialog to save as PDF.', 'success');
     } catch (error) {
         console.error('Error preparing print view:', error);
         showStatus('Error: ' + error.message, 'error');
     }
 });
-
-
 
 
 
@@ -1516,292 +1730,381 @@ printBtn.addEventListener('click', () => {
         }
     });
 
-    function generateReport() {
-        if (!selectedPlayerData) {
-            showStatus('No player data available to generate report.', 'error');
+	 function generateReport() {
+		if (!selectedPlayerData) {
+			showStatus('No player data available to generate report.', 'error');
+			return;
+		}
+		showStatus('Generating report...', 'info');
+
+		try {
+			const playerInfo = {
+				firstName: selectedPlayerData['First Name'] || 'Unknown',
+				lastName: selectedPlayerData['Last Name'] || 'Player',
+				sdob: formatExcelDate(selectedPlayerData['Date of Birth']),
+				position: selectedPlayerData['Position'] || ''
+			};
+
+			// Collect height growth data
+			const startMonth = parseInt(document.getElementById('height-start-month').value);
+			const endMonth = parseInt(document.getElementById('height-end-month').value);
+			const heightYear = parseInt(document.getElementById('height-year').value);
+			const months = [
+				'january', 'february', 'march', 'april', 'may', 'june',
+				'july', 'august', 'september', 'october', 'november', 'december'
+			];
+			const monthDisplayNames = [
+				'January', 'February', 'March', 'April', 'May', 'June',
+				'July', 'August', 'September', 'October', 'November', 'December'
+			];
+			const heightData = [];
+			let totalGrowth = 0;
+			let firstHeight = null;
+			let lastHeight = null;
+
+			// Determine the range of months
+			let monthRange = [];
+			if (endMonth >= startMonth) {
+				for (let i = startMonth; i <= endMonth; i++) {
+					monthRange.push(i);
+				}
+			} else {
+				for (let i = startMonth; i < 12; i++) {
+					monthRange.push(i);
+				}
+				for (let i = 0; i <= endMonth; i++) {
+					monthRange.push(i);
+				}
+			}
+
+			// Collect height data for the selected months
+			monthRange.forEach((monthIndex) => {
+				const month = months[monthIndex];
+				const displayMonth = monthDisplayNames[monthIndex];
+				const heightInput = document.getElementById(`height-${month}`);
+				const height = parseFloat(heightInput?.value) || 0;
+				if (height > 0) {
+					heightData.push({ month: displayMonth, height: height.toFixed(1) });
+					if (firstHeight === null) firstHeight = height;
+					lastHeight = height;
+				}
+			});
+
+			if (firstHeight !== null && lastHeight !== null && firstHeight !== lastHeight) {
+				totalGrowth = (lastHeight - firstHeight).toFixed(1);
+			}
+
+			// Store the height data and total growth globally
+			currentHeightGrowthData = heightData;
+			currentTotalGrowth = totalGrowth;
+
+			// Rest of the generateReport function remains the same...
+			function formatExcelDate(excelDate) {
+				if (!excelDate) return 'N/A';
+				try {
+					if (typeof excelDate === 'number' || !isNaN(Number(excelDate))) {
+						const serialDate = Number(excelDate);
+						if (serialDate < 1 || serialDate > 2958465) return String(excelDate);
+						const jsDate = new Date((serialDate - 1) * 86400000 + new Date(1900, 0, 1).getTime());
+						if (isNaN(jsDate.getTime())) return String(excelDate);
+						return jsDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+					} else if (typeof excelDate === 'string') {
+						const date = new Date(excelDate);
+						if (!isNaN(date.getTime())) return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+						return excelDate;
+					}
+					return String(excelDate);
+				} catch (error) {
+					console.error('Error formatting date:', error);
+					return String(excelDate);
+				}
+			}
+
+			const attendanceData = {
+				training: {
+					totalSessions: parseInt(document.getElementById('total-training-sessions')?.value || 0),
+					sessionsAttended: parseInt(document.getElementById('training-sessions-attended')?.value || 0),
+					totalMinutes: parseInt(document.getElementById('total-training-minutes')?.value || 0)
+				},
+				match: {
+					totalMatches: parseInt(document.getElementById('total-matches')?.value || 0),
+					matchesPlayed: parseInt(document.getElementById('matches-played')?.value || 0),
+					totalMinutes: parseInt(document.getElementById('total-match-minutes')?.value || 0),
+					minutesPlayed: parseInt(document.getElementById('match-minutes-played')?.value || 0)
+				}
+			};
+
+			const trainingAttendancePercentage = attendanceData.training.totalSessions > 0 
+				? (attendanceData.training.sessionsAttended / attendanceData.training.totalSessions * 100).toFixed(1) 
+				: 0;
+			const matchMinutesPercentage = attendanceData.match.totalMinutes > 0 
+				? (attendanceData.match.minutesPlayed / attendanceData.match.totalMinutes * 100).toFixed(1) 
+				: 0;
+
+			let attendanceBarColor = 'bg-gray-500';
+			if (trainingAttendancePercentage >= 80) {
+				attendanceBarColor = 'bg-green-500';
+			} else if (trainingAttendancePercentage > 60 && trainingAttendancePercentage < 80) {
+				attendanceBarColor = 'bg-amber-500';
+			} else if (trainingAttendancePercentage <= 60) {
+				attendanceBarColor = 'bg-red-500';
+			}
+
+			const ratings = {};
+			sliders.forEach(id => {
+				const slider = document.getElementById(id);
+				ratings[id] = slider ? parseInt(slider.value) : 3;
+			});
+
+			const gameIntelligenceAvg = ((ratings['movement-to-receive'] + ratings['actions-to-create'] + ratings['actions-to-disrupt']) / 3).toFixed(1);
+			const technicalAbilityAvg = ((ratings['with-balance'] + ratings['with-speed'] + ratings['execution']) / 3).toFixed(1);
+			const physicalCapacityAvg = ((ratings['speed'] + ratings['aggressive'] + ratings['dominant']) / 3).toFixed(1);
+			const socialCompetenceAvg = ((ratings['communication'] + ratings['demanding'] + ratings['confidence']) / 3).toFixed(1);
+
+			const coach1Name = document.getElementById('coach1-name')?.value || 'Melvin Chow';
+			const coach1Title = document.getElementById('coach1-title')?.value || 'Coach';
+			const coach2Name = document.getElementById('coach2-name')?.value || 'Lee Hong Lim';
+			const coach2Title = document.getElementById('coach2-title')?.value || 'Coach';
+			const technicalDirector = document.getElementById('technical-director')?.value || 'Darren Bowman';
+			const technicalDirectorTitle = document.getElementById('technical-director-title')?.value || 'Technical Director';
+			const targetedFeedback = document.getElementById('targeted-feedback')?.value || '';
+			const areasImprovement = document.getElementById('areas-improvement')?.value || '';
+			const currentGrade = document.getElementById('current-grade')?.value || 'A';
+			const targetGrade = document.getElementById('target-grade')?.value || 'A';
+
+			const gradeStyles = {
+				'A': 'bg-green-200 text-green-800 font-semibold',
+				'B': 'bg-lime-200 text-lime-800 font-semibold',
+				'C': 'bg-yellow-200 text-yellow-800 font-semibold',
+				'D': 'bg-orange-200 text-orange-800 font-semibold',
+				'E': 'bg-red-200 text-red-800 font-semibold'
+			};
+			const currentGradeStyle = gradeStyles[currentGrade] || 'bg-gray-200 text-gray-800';
+			const targetGradeStyle = gradeStyles[targetGrade] || 'bg-gray-200 text-gray-800';
+
+			let clubLogoHTML = clubLogoData ? `<img src="${clubLogoData}" alt="Club Logo" class="w-full h-auto">` : defaultClubLogoSVG;
+			let portraitHTML = portraitImageData 
+				? `<img src="${portraitImageData}" alt="Player Portrait" class="w-full h-full object-cover border-2 border-gray-300">` 
+				: '<div class="w-full h-full bg-gray-200 flex items-center justify-center border-2 border-gray-300"><span class="text-gray-500">No Photo</span></div>';
+			let positionHTML = playerInfo.position ? `<p class="text-gray-600">Position: ${playerInfo.position}</p>` : '';
+
+			const reportHTML = `
+				<div class="bg-white text-black p-8 print:p-[0.5cm] w-full max-w-[19cm] mx-auto" id="report-container" style="height: auto; overflow: visible; page-break-inside: auto; break-inside: auto;">
+					<div class="mb-6 border-b-2 border-primary pb-4">
+						<div class="grid grid-cols-6 gap-4 mb-4">
+							<div class="col-span-1">${clubLogoHTML}</div>
+							<div class="col-span-5">
+								<h1 class="text-3xl font-bold text-primary">Player Performance Review</h1>
+							</div>
+						</div>
+						<div class="grid grid-cols-4 gap-4">
+							<div class="col-span-3">
+								<h2 class="text-xl font-semibold">${playerInfo.firstName} ${playerInfo.lastName}</h2>
+								<p class="text-gray-600">Date of Birth: ${playerInfo.sdob}</p>
+								${positionHTML}
+								<p class="text-gray-600">Review Date: ${new Date().toLocaleDateString()}</p>
+							</div>
+							<div class="col-span-1">
+								<div class="w-32 h-32 overflow-hidden">${portraitHTML}</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="mb-8">
+						<h3 class="font-bold text-xl mb-4 text-primary">Height Growth Over Season (${heightYear})</h3>
+						<div class="border rounded-lg p-2">
+							<div class="space-y-2">
+								<table class="w-full text-left">
+									<thead>
+										<tr class="border-b">
+											<th class="py-2 px-4">Month</th>
+											${heightData.map(data => `
+												<th class="py-2 px-4">${data.month}</th>
+											`).join('')}
+										</tr>
+									</thead>
+									<tbody>
+										<tr class="border-b">
+											<td class="py-2 px-4">Height (cm)</td>
+											${heightData.length > 0 ? heightData.map(data => `
+												<td class="py-2 px-4">${data.height}</td>
+											`).join('') : `
+												<td colspan="${monthRange.length}" class="py-2 px-4 text-center text-gray-500">No height data available.</td>
+											`}
+										</tr>
+										${heightData.length > 1 && totalGrowth !== 0 ? `
+											<tr class="font-semibold text-primary">
+												<td class="py-2 px-4">Total Growth:</td>
+												<td colspan="${monthRange.length}" class="py-2 px-4">${totalGrowth > 0 ? '+' : ''}${totalGrowth} cm</td>
+											</tr>
+										` : ''}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					
+					<div class="mb-8">
+						<h3 class="font-bold text-xl mb-4 text-primary">Player Attendance</h3>
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+							<div class="border rounded-lg p-2">
+								<h4 class="font-bold text-lg mb-3">Training Attendance</h4>
+								<div class="space-y-2">
+									<div class="flex justify-between"><span>Total Training Sessions:</span><span class="font-medium">${attendanceData.training.totalSessions}</span></div>
+									<div class="flex justify-between"><span>Sessions Attended:</span><span class="font-medium">${attendanceData.training.sessionsAttended}</span></div>
+									<div class="flex justify-between"><span>Total Training Minutes:</span><span class="font-medium">${attendanceData.training.totalMinutes}</span></div>
+									<div class="flex justify-between text-primary font-semibold mt-2 pt-2 border-t"><span>Attendance Rate:</span><span>${trainingAttendancePercentage}%</span></div>
+									<div class="w-full bg-gray-200 rounded-full h-2.5 mt-1"><div class="${attendanceBarColor} h-2.5 rounded-full" style="width: ${trainingAttendancePercentage}%"></div></div>
+								</div>
+							</div>
+							<div class="border rounded-lg p-2">
+								<h4 class="font-bold text-lg mb-3">Match Clock</h4>
+								<div class="space-y-2">
+									<div class="flex justify-between"><span>Total Matches:</span><span class="font-medium">${attendanceData.match.totalMatches}</span></div>
+									<div class="flex justify-between"><span>Played:</span><span class="font-medium">${attendanceData.match.matchesPlayed}</span></div>
+									<div class="flex justify-between"><span>Total Minutes:</span><span class="font-medium">${attendanceData.match.totalMinutes}</span></div>
+									<div class="flex justify-between"><span>Minutes Played:</span><span class="font-medium">${attendanceData.match.minutesPlayed}</span></div>
+									<div class="flex justify-between text-primary font-semibold mt-2 pt-2 border-t"><span> </span><span>${matchMinutesPercentage}%</span></div>
+									<div class="w-full bg-gray-200 rounded-full h-2.5 mt-1"><div class="bg-primary h-2.5 rounded-full" style="width: ${matchMinutesPercentage}%"></div></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+						<div class="border rounded-lg p-2">
+							<h3 class="font-bold text-lg mb-2 text-primary">Player Evaluation Radar</h3>
+							<div class="flex justify-center"><div style="width: 150px; height: 150px;"><canvas id="skills-radar"></canvas></div></div>
+						</div>
+						<div class="border rounded-lg p-2">
+							<h3 class="font-bold text-lg mb-2 text-primary">Player Grades</h3>
+							<div class="grid grid-cols-1 gap-4">
+								<div>
+									<p class="font-medium text-base">Current Grade</p>
+									<p class="${currentGradeStyle} text-center text-lg p-2 rounded-md">${currentGrade}</p>
+								</div>
+								<div>
+									<p class="font-medium text-base">Target Grade</p>
+									<p class="${targetGradeStyle} text-center text-lg p-2 rounded-md">${targetGrade}</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+						<div class="border rounded-lg p-2">
+							<h3 class="font-bold text-base mb-1 text-primary">Game Intelligence</h3>
+							<div class="space-y-1 text-base">
+								${createRatingBar('Movement to Receive', ratings['movement-to-receive'])}
+								${createRatingBar('Actions to Create', ratings['actions-to-create'])}
+								${createRatingBar('Actions to Disrupt', ratings['actions-to-disrupt'])}
+							</div>
+						</div>
+						<div class="border rounded-lg p-2">
+							<h3 class="font-bold text-base mb-1 text-primary">Technical Ability</h3>
+							<div class="space-y-1 text-base">
+								${createRatingBar('With Balance', ratings['with-balance'])}
+								${createRatingBar('With Speed', ratings['with-speed'])}
+								${createRatingBar('Execution', ratings['execution'])}
+							</div>
+						</div>
+						<div class="border rounded-lg p-2">
+							<h3 class="font-bold text-base mb-1 text-primary">Physical Capacity</h3>
+							<div class="space-y-1 text-base">
+								${createRatingBar('Speed', ratings['speed'])}
+								${createRatingBar('Aggressive', ratings['aggressive'])}
+								${createRatingBar('Dominant', ratings['dominant'])}
+							</div>
+						</div>
+						<div class="border rounded-lg p-2">
+							<h3 class="font-bold text-base mb-1 text-primary">Social Competence</h3>
+							<div class="space-y-1 text-base">
+								${createRatingBar('Communication', ratings['communication'])}
+								${createRatingBar('Demanding', ratings['demanding'])}
+								${createRatingBar('Confidence', ratings['confidence'])}
+							</div>
+						</div>
+					</div>
+					<div class="space-y-2 mb-4">
+						<div class="border rounded-lg p-2">
+							<h3 class="font-bold text-base mb-1 text-primary">Targeted Feedback</h3>
+							<p class="whitespace-pre-line text-base">${targetedFeedback || 'No feedback provided.'}</p>
+						</div>
+						<div class="border rounded-lg p-2">
+							<h3 class="font-bold text-base mb-1 text-primary">Areas of Improvement</h3>
+							<p class="whitespace-pre-line text-base">${areasImprovement || 'No areas of improvement identified.'}</p>
+						</div>
+					</div>
+					<div class="mt-6 mb-4 signature-section">
+						<div class="flex flex-wrap justify-between">
+							<div class="text-center mx-2 mb-2"><div class="signature-line"></div><p class="mt-1 text-base">${coach1Name}</p><p class="text-sm text-gray-600">${coach1Title}</p></div>
+							<div class="text-center mx-2 mb-2"><div class="signature-line"></div><p class="mt-1 text-base">${coach2Name}</p><p class="text-sm text-gray-600">${coach2Title}</p></div>
+							<div class="text-center mx-2 mb-2"><div class="signature-line"></div><p class="mt-1 text-base">${technicalDirector}</p><p class="text-sm text-gray-600">${technicalDirectorTitle}</p></div>
+						</div>
+					</div>
+					<div class="text-center text-sm text-gray-500 border-t-2 border-gray-200 pt-2 mt-4">
+						<p>Lee Man Football Club - Player Development Report</p>
+						<p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+					</div>
+				</div>
+			`;
+
+        currentReportHTML = reportHTML;
+        reportPreview.innerHTML = reportHTML;
+        pdfControls.classList.remove('hidden');
+
+        const canvas = document.getElementById('skills-radar');
+        if (!canvas || !canvas.getContext) {
+            console.error('Canvas element not found or context unavailable');
+            showStatus('Error: Skills chart could not be rendered.', 'error');
             return;
         }
-        showStatus('Generating report...', 'info');
+        const ctx = canvas.getContext('2d');
+        if (window.skillsChart) window.skillsChart.destroy();
 
-        try {
-            const playerInfo = {
-                firstName: selectedPlayerData['First Name'] || 'Unknown',
-                lastName: selectedPlayerData['Last Name'] || 'Player',
-                sdob: formatExcelDate(selectedPlayerData['Date of Birth']),
-                position: selectedPlayerData['Position'] || ''
-            };
+        window.skillsChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Game Intelligence', 'Technical Ability', 'Physical Capacity', 'Social Competence'],
+                datasets: [{
+                    label: 'Player Skills',
+                    data: [gameIntelligenceAvg, technicalAbilityAvg, physicalCapacityAvg, socialCompetenceAvg],
+                    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                    borderColor: '#FFD700',
+                    pointBackgroundColor: '#FFD700',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#FFD700'
+                }]
+            },
+            options: {
+                animation: {
+                    onComplete: () => {
+                        const chartImage = canvas.toDataURL('image/png');
+                        currentReportHTML = currentReportHTML.replace(
+                            '<canvas id="skills-radar"></canvas>',
+                            `<img src="${chartImage}" alt="Player Evaluation Radar" style="width: 150px; height: 150px;">`
+                        );
+                        reportPreview.innerHTML = currentReportHTML;
 
-            function formatExcelDate(excelDate) {
-                if (!excelDate) return 'N/A';
-                try {
-                    if (typeof excelDate === 'number' || !isNaN(Number(excelDate))) {
-                        const serialDate = Number(excelDate);
-                        if (serialDate < 1 || serialDate > 2958465) return String(excelDate);
-                        const jsDate = new Date((serialDate - 1) * 86400000 + new Date(1900, 0, 1).getTime());
-                        if (isNaN(jsDate.getTime())) return String(excelDate);
-                        return jsDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    } else if (typeof excelDate === 'string') {
-                        const date = new Date(excelDate);
-                        if (!isNaN(date.getTime())) return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                        return excelDate;
+                        const playerName = `${playerInfo.firstName} ${playerInfo.lastName}`;
+                        const reportEntry = {
+                            name: playerName,
+                            html: currentReportHTML,
+                            timestamp: new Date().toISOString()
+                        };
+                        savedReports.push(reportEntry);
+                        updateSavedReportsList();
+                        showStatus('Report generated and saved successfully!', 'success');
                     }
-                    return String(excelDate);
-                } catch (error) {
-                    console.error('Error formatting date:', error);
-                    return String(excelDate);
-                }
-            }
-
-            const attendanceData = {
-                training: {
-                    totalSessions: parseInt(document.getElementById('total-training-sessions')?.value || 0),
-                    sessionsAttended: parseInt(document.getElementById('training-sessions-attended')?.value || 0),
-                    totalMinutes: parseInt(document.getElementById('total-training-minutes')?.value || 0)
                 },
-                match: {
-                    totalMatches: parseInt(document.getElementById('total-matches')?.value || 0),
-                    matchesPlayed: parseInt(document.getElementById('matches-played')?.value || 0),
-                    totalMinutes: parseInt(document.getElementById('total-match-minutes')?.value || 0),
-                    minutesPlayed: parseInt(document.getElementById('match-minutes-played')?.value || 0)
-                }
-            };
-
-            const trainingAttendancePercentage = attendanceData.training.totalSessions > 0 
-                ? (attendanceData.training.sessionsAttended / attendanceData.training.totalSessions * 100).toFixed(1) 
-                : 0;
-            const matchMinutesPercentage = attendanceData.match.totalMinutes > 0 
-                ? (attendanceData.match.minutesPlayed / attendanceData.match.totalMinutes * 100).toFixed(1) 
-                : 0;
-
-            let attendanceBarColor = 'bg-gray-500';
-            if (trainingAttendancePercentage >= 80) {
-                attendanceBarColor = 'bg-green-500';
-            } else if (trainingAttendancePercentage > 60 && trainingAttendancePercentage < 80) {
-                attendanceBarColor = 'bg-amber-500';
-            } else if (trainingAttendancePercentage <= 60) {
-                attendanceBarColor = 'bg-red-500';
+                plugins: { legend: { display: false } },
+                scales: { r: { angleLines: { display: true }, min: 0, max: 5, ticks: { stepSize: 1 } } }
             }
-
-            const ratings = {};
-            sliders.forEach(id => {
-                const slider = document.getElementById(id);
-                ratings[id] = slider ? parseInt(slider.value) : 3;
-            });
-
-            const gameIntelligenceAvg = ((ratings['movement-to-receive'] + ratings['actions-to-create'] + ratings['actions-to-disrupt']) / 3).toFixed(1);
-            const technicalAbilityAvg = ((ratings['with-balance'] + ratings['with-speed'] + ratings['execution']) / 3).toFixed(1);
-            const physicalCapacityAvg = ((ratings['speed'] + ratings['aggressive'] + ratings['dominant']) / 3).toFixed(1);
-            const socialCompetenceAvg = ((ratings['communication'] + ratings['demanding'] + ratings['confidence']) / 3).toFixed(1);
-
-            const coach1Name = document.getElementById('coach1-name')?.value || 'Melvin Chow';
-            const coach1Title = document.getElementById('coach1-title')?.value || 'Coach';
-            const coach2Name = document.getElementById('coach2-name')?.value || 'Lee Hong Lim';
-            const coach2Title = document.getElementById('coach2-title')?.value || 'Coach';
-            const technicalDirector = document.getElementById('technical-director')?.value || 'Darren Bowman';
-            const technicalDirectorTitle = document.getElementById('technical-director-title')?.value || 'Technical Director';
-            const targetedFeedback = document.getElementById('targeted-feedback')?.value || '';
-            const areasImprovement = document.getElementById('areas-improvement')?.value || '';
-            const currentGrade = document.getElementById('current-grade')?.value || 'A';
-            const targetGrade = document.getElementById('target-grade')?.value || 'A';
-
-            const gradeStyles = {
-                'A': 'bg-green-200 text-green-800 font-semibold',
-                'B': 'bg-lime-200 text-lime-800 font-semibold',
-                'C': 'bg-yellow-200 text-yellow-800 font-semibold',
-                'D': 'bg-orange-200 text-orange-800 font-semibold',
-                'E': 'bg-red-200 text-red-800 font-semibold'
-            };
-            const currentGradeStyle = gradeStyles[currentGrade] || 'bg-gray-200 text-gray-800';
-            const targetGradeStyle = gradeStyles[targetGrade] || 'bg-gray-200 text-gray-800';
-
-let clubLogoHTML = clubLogoData ? `<img src="${clubLogoData}" alt="Club Logo" class="w-full h-auto">` : defaultClubLogoSVG;
-            let portraitHTML = portraitImageData 
-                ? `<img src="${portraitImageData}" alt="Player Portrait" class="w-full h-full object-cover border-2 border-gray-300">` 
-                : '<div class="w-full h-full bg-gray-200 flex items-center justify-center border-2 border-gray-300"><span class="text-gray-500">No Photo</span></div>';
-            let positionHTML = playerInfo.position ? `<p class="text-gray-600">Position: ${playerInfo.position}</p>` : '';
-
-            const reportHTML = `
-                <div class="bg-white text-black p-8 print:p-[0.5cm] w-full max-w-[19cm] mx-auto" id="report-container" style="height: auto; overflow: visible; page-break-inside: auto; break-inside: auto;">
-                    <div class="mb-6 border-b-2 border-primary pb-4">
-                        <div class="grid grid-cols-6 gap-4 mb-4">
-                            <div class="col-span-1">${clubLogoHTML}</div>
-                            <div class="col-span-5">
-                                <h1 class="text-3xl font-bold text-primary">Player Performance Review</h1>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-4 gap-4">
-                            <div class="col-span-3">
-                                <h2 class="text-xl font-semibold">${playerInfo.firstName} ${playerInfo.lastName}</h2>
-                                <p class="text-gray-600">Date of Birth: ${playerInfo.sdob}</p>
-                                ${positionHTML}
-                                <p class="text-gray-600">Review Date: ${new Date().toLocaleDateString()}</p>
-                            </div>
-                            <div class="col-span-1">
-                                <div class="w-32 h-32 overflow-hidden">${portraitHTML}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-8">
-                        <h3 class="font-bold text-xl mb-4 text-primary">Player Attendance</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="border rounded-lg p-2">
-                                <h4 class="font-bold text-lg mb-3">Training Attendance</h4>
-                                <div class="space-y-2">
-                                    <div class="flex justify-between"><span>Total Training Sessions:</span><span class="font-medium">${attendanceData.training.totalSessions}</span></div>
-                                    <div class="flex justify-between"><span>Sessions Attended:</span><span class="font-medium">${attendanceData.training.sessionsAttended}</span></div>
-                                    <div class="flex justify-between"><span>Total Training Minutes:</span><span class="font-medium">${attendanceData.training.totalMinutes}</span></div>
-                                    <div class="flex justify-between text-primary font-semibold mt-2 pt-2 border-t"><span>Attendance Rate:</span><span>${trainingAttendancePercentage}%</span></div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1"><div class="${attendanceBarColor} h-2.5 rounded-full" style="width: ${trainingAttendancePercentage}%"></div></div>
-                                </div>
-                            </div>
-                            <div class="border rounded-lg p-2">
-                                <h4 class="font-bold text-lg mb-3">Match Clock</h4>
-                                <div class="space-y-2">
-                                    <div class="flex justify-between"><span>Total Matches:</span><span class="font-medium">${attendanceData.match.totalMatches}</span></div>
-                                    <div class="flex justify-between"><span>Played:</span><span class="font-medium">${attendanceData.match.matchesPlayed}</span></div>
-                                    <div class="flex justify-between"><span>Total Minutes:</span><span class="font-medium">${attendanceData.match.totalMinutes}</span></div>
-                                    <div class="flex justify-between"><span>Minutes Played:</span><span class="font-medium">${attendanceData.match.minutesPlayed}</span></div>
-                                    <div class="flex justify-between text-primary font-semibold mt-2 pt-2 border-t"><span> </span><span>${matchMinutesPercentage}%</span></div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1"><div class="bg-primary h-2.5 rounded-full" style="width: ${matchMinutesPercentage}%"></div></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="border rounded-lg p-2">
-                            <h3 class="font-bold text-lg mb-2 text-primary">Player Evaluation Radar</h3>
-                            <div class="flex justify-center"><div style="width: 150px; height: 150px;"><canvas id="skills-radar"></canvas></div></div>
-                        </div>
-                        <div class="border rounded-lg p-2">
-                            <h3 class="font-bold text-lg mb-2 text-primary">Player Grades</h3>
-                            <div class="grid grid-cols-1 gap-4">
-                                <div>
-                                    <p class="font-medium text-base">Current Grade</p>
-                                    <p class="${currentGradeStyle} text-center text-lg p-2 rounded-md">${currentGrade}</p>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-base">Target Grade</p>
-                                    <p class="${targetGradeStyle} text-center text-lg p-2 rounded-md">${targetGrade}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                        <div class="border rounded-lg p-2">
-                            <h3 class="font-bold text-base mb-1 text-primary">Game Intelligence</h3>
-                            <div class="space-y-1 text-base">
-                                ${createRatingBar('Movement to Receive', ratings['movement-to-receive'])}
-                                ${createRatingBar('Actions to Create', ratings['actions-to-create'])}
-                                ${createRatingBar('Actions to Disrupt', ratings['actions-to-disrupt'])}
-                            </div>
-                        </div>
-                        <div class="border rounded-lg p-2">
-                            <h3 class="font-bold text-base mb-1 text-primary">Technical Ability</h3>
-                            <div class="space-y-1 text-base">
-                                ${createRatingBar('With Balance', ratings['with-balance'])}
-                                ${createRatingBar('With Speed', ratings['with-speed'])}
-                                ${createRatingBar('Execution', ratings['execution'])}
-                            </div>
-                        </div>
-                        <div class="border rounded-lg p-2">
-                            <h3 class="font-bold text-base mb-1 text-primary">Physical Capacity</h3>
-                            <div class="space-y-1 text-base">
-                                ${createRatingBar('Speed', ratings['speed'])}
-                                ${createRatingBar('Aggressive', ratings['aggressive'])}
-                                ${createRatingBar('Dominant', ratings['dominant'])}
-                            </div>
-                        </div>
-                        <div class="border rounded-lg p-2">
-                            <h3 class="font-bold text-base mb-1 text-primary">Social Competence</h3>
-                            <div class="space-y-1 text-base">
-                                ${createRatingBar('Communication', ratings['communication'])}
-                                ${createRatingBar('Demanding', ratings['demanding'])}
-                                ${createRatingBar('Confidence', ratings['confidence'])}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="space-y-2 mb-4">
-                        <div class="border rounded-lg p-2">
-                            <h3 class="font-bold text-base mb-1 text-primary">Targeted Feedback</h3>
-                            <p class="whitespace-pre-line text-base">${targetedFeedback || 'No feedback provided.'}</p>
-                        </div>
-                        <div class="border rounded-lg p-2">
-                            <h3 class="font-bold text-base mb-1 text-primary">Areas of Improvement</h3>
-                            <p class="whitespace-pre-line text-base">${areasImprovement || 'No areas of improvement identified.'}</p>
-                        </div>
-                    </div>
-                    <div class="mt-6 mb-4 signature-section">
-                        <div class="flex flex-wrap justify-between">
-                            <div class="text-center mx-2 mb-2"><div class="signature-line"></div><p class="mt-1 text-base">${coach1Name}</p><p class="text-sm text-gray-600">${coach1Title}</p></div>
-                            <div class="text-center mx-2 mb-2"><div class="signature-line"></div><p class="mt-1 text-base">${coach2Name}</p><p class="text-sm text-gray-600">${coach2Title}</p></div>
-                            <div class="text-center mx-2 mb-2"><div class="signature-line"></div><p class="mt-1 text-base">${technicalDirector}</p><p class="text-sm text-gray-600">${technicalDirectorTitle}</p></div>
-                        </div>
-                    </div>
-                    <div class="text-center text-sm text-gray-500 border-t-2 border-gray-200 pt-2 mt-4">
-                        <p>Lee Man Football Club - Player Development Report</p>
-                        <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
-                    </div>
-                </div>
-            `;
-
-            currentReportHTML = reportHTML;
-            reportPreview.innerHTML = reportHTML;
-            pdfControls.classList.remove('hidden');
-
-            const canvas = document.getElementById('skills-radar');
-            if (!canvas || !canvas.getContext) {
-                console.error('Canvas element not found or context unavailable');
-                showStatus('Error: Skills chart could not be rendered.', 'error');
-                return;
-            }
-            const ctx = canvas.getContext('2d');
-            if (window.skillsChart) window.skillsChart.destroy();
-
-            window.skillsChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Game Intelligence', 'Technical Ability', 'Physical Capacity', 'Social Competence'],
-                    datasets: [{
-                        label: 'Player Skills',
-                        data: [gameIntelligenceAvg, technicalAbilityAvg, physicalCapacityAvg, socialCompetenceAvg],
-                        backgroundColor: 'rgba(255, 215, 0, 0.2)',
-                        borderColor: '#FFD700',
-                        pointBackgroundColor: '#FFD700',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#FFD700'
-                    }]
-                },
-                options: {
-                    animation: {
-                        onComplete: () => {
-                            const chartImage = canvas.toDataURL('image/png');
-                            currentReportHTML = currentReportHTML.replace(
-                                '<canvas id="skills-radar"></canvas>',
-                                `<img src="${chartImage}" alt="Player Evaluation Radar" style="width: 150px; height: 150px;">`
-                            );
-                            reportPreview.innerHTML = currentReportHTML;
-
-                            const playerName = `${playerInfo.firstName} ${playerInfo.lastName}`;
-                            const reportEntry = {
-                                name: playerName,
-                                html: currentReportHTML,
-                                timestamp: new Date().toISOString()
-                            };
-                            savedReports.push(reportEntry);
-                            updateSavedReportsList();
-                            showStatus('Report generated and saved successfully!', 'success');
-                        }
-                    },
-                    plugins: { legend: { display: false } },
-                    scales: { r: { angleLines: { display: true }, min: 0, max: 5, ticks: { stepSize: 1 } } }
-                }
-            });
-        } catch (error) {
-            console.error('Error in generateReport:', error);
-            showStatus('Error generating report: ' + error.message, 'error');
-        }
+        });
+    } catch (error) {
+        console.error('Error in generateReport:', error);
+        showStatus('Error generating report: ' + error.message, 'error');
     }
+}
 
     function createRatingBar(label, value) {
         const stars = Array(5).fill(0).map((_, i) => 
