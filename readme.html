@@ -296,29 +296,27 @@
                 </li>
             </ol>
 
-            <h3 class="text-xl font-semibold text-primary mb-3">注意事項</h3>
+			<h3 class="text-xl font-semibold text-primary mb-3">注意事項</h3>
             <ul class="list-disc pl-5">
                 <li><strong>重置表單：</strong>點擊「Reset Form」按鈕清除所有輸入。</li>
-                <li><strong>數據隱私：</strong>球員數據僅在當前視窗中保存，瀏覽器刷新後不會保留，除非已導出。</li>
+                <li><strong>數據隱私：</strong>球員數據僅在當前會話中保存，瀏覽器刷新後不會保留，除非已導出。</li>
                 <li><strong>圖表渲染：</strong>報告中的雷達圖需稍等片刻渲染完成後再列印。</li>
             </ul>
         </div>
     </div>
 
-
     <script>
         function showLanguage(lang) {
-            // Hide all sections
             document.querySelectorAll('.readme-section').forEach(section => {
-                section.classList.remove('active');
+                section.classList.add('hidden');
             });
-            // Show selected section
-            document.getElementById(`readme-${lang}`).classList.add('active');
-            // Update button states
+            document.getElementById(`readme-${lang}`).classList.remove('hidden');
             document.querySelectorAll('.language-toggle button').forEach(btn => {
-                btn.classList.remove('active');
+                btn.classList.remove('bg-primary', 'text-white', 'bg-gray-600', 'text-white');
+                btn.classList.add('bg-gray-600', 'text-white');
             });
-            document.getElementById(`${lang}-btn`).classList.add('active');
+            document.getElementById(`${lang}-btn`).classList.remove('bg-gray-600');
+            document.getElementById(`${lang}-btn`).classList.add('bg-primary', 'text-white');
         }
     </script>
 </body>
