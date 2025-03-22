@@ -848,46 +848,148 @@
         slider.addEventListener('input', () => valueDisplay.textContent = slider.value);
     });
 
-    xlsFileInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        try {
-            showStatus('Reading player data...', 'info');
-            const data = await file.arrayBuffer();
-            const workbook = XLSX.read(data);
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            playersData = XLSX.utils.sheet_to_json(worksheet);
-            
-            if (playersData.length > 0) {
-                playerSelect.innerHTML = '<option value="">Select a player...</option>';
-                playersData.forEach((player, index) => {
-                    const fullName = `${player['First Name'] || ''} ${player['Last Name'] || ''}`.trim();
-                    const option = document.createElement('option');
-                    option.value = index;
-                    option.textContent = fullName || `Player ${index + 1}`;
-                    playerSelect.appendChild(option);
-                });
-                playerSelectContainer.classList.remove('hidden');
-                showStatus(`${playersData.length} players loaded successfully!`, 'success');
-            } else {
-                showStatus('No player data found in the file.', 'error');
-            }
-        } catch (error) {
-            console.error('Error parsing XLS file:', error);
-            showStatus('Error reading player data. Check file format.', 'error');
-        }
+   xlsFileInput.addEventListener('change', async (e) => {
+		const file = e.target.files[0];
+		if (!file) return;
+		try {
+			showStatus('Reading player data...', 'info');
+			const data = await file.arrayBuffer();
+			const workbook = XLSX.read(data);
+			const firstSheetName = workbook.SheetNames[0];
+			const worksheet = workbook.Sheets[firstSheetName];
+			playersData = XLSX.utils.sheet_to_json(worksheet);
+
+			if (playersData.length > 0) {
+				playerSelect.innerHTML = '<option value="">Select a player...</option>';
+				playersData.forEach((player, index) => {
+					const fullName = `${player['First Name'] || ''} ${player['Last Name'] || ''}`.trim();
+					const option = document.createElement('option');
+					option.value = index;
+					option.textContent = fullName || `Player ${index + 1}`;
+					playerSelect.appendChild(option);
+				});
+				playerSelectContainer.classList.remove('hidden');
+				showStatus(`${playersData.length} players loaded successfully!`, 'success');
+			} else {
+				showStatus('No player data found in the file.', 'error');
+			}
+		} catch (error) {
+			console.error('Error parsing XLS file:', error);
+			showStatus('Error reading player data. Check file format.', 'error');
+		}
+	});
+
+// Enhanced player selection to populate all fields
+playerSelect.addEventListener('change', () => {
+    const selectedIndex = playerSelect.value;
+    if (selectedIndex === '') {
+        selectedPlayerData = null;
+        resetBtn.click(); // Reset form to defaults
+        return;
+    }
+    selectedPlayerData = playersData[selectedIndex];
+    const player = selectedPlayerData;
+    showStatus(`Selected player: ${player['First Name'] || ''} ${player['Last Name'] || ''}`, 'info');
+
+    // Populate manual input fields (for reference)
+    manualFirstName.value = player['First Name'] || '';
+    manualLastName.value = player['Last Name'] || '';
+    manualDob.value = player['Date of Birth'] ? formatExcelDateToInput(player['Date of Birth']) : '';
+    manualPosition.value = player['Position'] || '';
+
+    // Attendance Data
+    document.getElementById('total-training-sessions').value = player['Total Training Sessions'] || 0;
+    document.getElementById('training-sessions-attended').value = player['Training Sessions Attended'] || 0;
+    document.getElementById('total-training-minutes').value = player['Total Training Minutes'] || 0;
+    document.getElementById('total-matches').value = player['Total Matches'] || 0;
+    document.getElementById('matches-played').value = player['Matches Played'] || 0;
+    document.getElementById('total-match-minutes').value = player['Total Match Minutes'] || 0;
+    document.getElementById('match-minutes-played').value = player['Match Minutes Played'] || 0;
+
+    // Performance Ratings
+    const ratingsMap = {
+        'movement-to-receive': 'Movement to Receive',
+        'actions-to-create': 'Actions to Create',
+        'actions-to-disrupt': 'Actions to Disrupt',
+        'with-balance': 'With Balance',
+        'with-speed': 'With Speed',
+        'execution': 'Execution',
+        'speed': 'Speed',
+        'aggressive': 'Aggressive',
+        'dominant': 'Dominant',
+        'communication': 'Communication',
+        'demanding': 'Demanding',
+        'confidence': 'Confidence'
+    };
+    sliders.forEach(id => {
+        const slider = document.getElementById(id);
+        const valueDisplay = document.getElementById(`${id}-value`);
+        const value = Math.min(5, Math.max(1, parseInt(player[ratingsMap[id]]) || 3));
+        slider.value = value;
+        valueDisplay.textContent = value;
     });
 
-    playerSelect.addEventListener('change', () => {
-        const selectedIndex = playerSelect.value;
-        if (selectedIndex === '') {
-            selectedPlayerData = null;
-            return;
+    // Grades
+    document.getElementById('current-grade').value = player['Current Grade'] || 'A';
+    document.getElementById('target-grade').value = player['Target Grade'] || 'A';
+
+    // Feedback
+    document.getElementById('targeted-feedback').value = player['Targeted Feedback'] || '';
+    document.getElementById('areas-improvement').value = player['Areas of Improvement'] || '';
+
+    // Signatures
+    document.getElementById('coach1-name').value = player['Coach 1 Name'] || 'Melvin Chow';
+    document.getElementById('coach1-title').value = player['Coach 1 Title'] || 'Coach';
+    document.getElementById('coach2-name').value = player['Coach 2 Name'] || 'Lee Hong Lim';
+    document.getElementById('coach2-title').value = player['Coach 2 Title'] || 'Coach';
+    document.getElementById('technical-director').value = player['Technical Director'] || 'Darren Bowman';
+    document.getElementById('technical-director-title').value = player['Technical Director Title'] || 'Technical Director';
+
+	// Height Growth Data
+    const heightYear = player['Height Year'] || new Date().getFullYear();
+    document.getElementById('height-year').value = heightYear;
+    const monthShortNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    const monthFullNames = [
+        'january', 'february', 'march', 'april', 'may', 'june',
+        'july', 'august', 'september', 'october', 'november', 'december'
+    ];
+    let minMonth = 0, maxMonth = 11;
+    monthShortNames.forEach((shortMonth, index) => {
+        const excelColumn = `${shortMonth.charAt(0).toUpperCase() + shortMonth.slice(1)} Height`;
+        const height = parseFloat(player[excelColumn]) || 0;
+        const fullMonth = monthFullNames[index];
+        const input = document.getElementById(`height-${fullMonth}`);
+        if (input) {
+            input.value = height > 0 ? height : '';
+            if (height > 0) {
+                minMonth = Math.min(minMonth, index);
+                maxMonth = Math.max(maxMonth, index);
+            }
         }
-        selectedPlayerData = playersData[selectedIndex];
-        showStatus(`Selected player: ${selectedPlayerData['First Name'] || ''} ${selectedPlayerData['Last Name'] || ''}`, 'info');
     });
+    document.getElementById('height-start-month').value = minMonth;
+    document.getElementById('height-end-month').value = maxMonth;
+    generateHeightInputs(minMonth, maxMonth); // Regenerate inputs with populated values
+    monthShortNames.slice(minMonth, maxMonth + 1).forEach((shortMonth, index) => {
+        const excelColumn = `${shortMonth.charAt(0).toUpperCase() + shortMonth.slice(1)} Height`;
+        const height = parseFloat(player[excelColumn]) || 0;
+        const fullMonth = monthFullNames[index + minMonth];
+        const input = document.getElementById(`height-${fullMonth}`);
+        if (input) input.value = height > 0 ? height : '';
+    });
+});
+
+// Helper function to format Excel date to input date (YYYY-MM-DD)
+function formatExcelDateToInput(excelDate) {
+    if (!excelDate) return '';
+    if (typeof excelDate === 'number') {
+        const jsDate = new Date((excelDate - 1) * 86400000 + new Date(1900, 0, 1).getTime());
+        return jsDate.toISOString().split('T')[0];
+    }
+    const date = new Date(excelDate);
+    return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
+}
+
 
     portraitFileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -1449,23 +1551,57 @@ printBtn.addEventListener('click', () => {
         let expectedMonthCount = 1; // Default to 1 to avoid colspan="0"
 
         // Calculate expected month count for colspan when there's no data
-        const startMonth = parseInt(document.getElementById('height-start-month').value);
-        const endMonth = parseInt(document.getElementById('height-end-month').value);
-        let monthRange = [];
-        if (endMonth >= startMonth) {
-            for (let i = startMonth; i <= endMonth; i++) {
-                monthRange.push(i);
-            }
-        } else {
-            for (let i = startMonth; i < 12; i++) {
-                monthRange.push(i);
-            }
-            for (let i = 0; i <= endMonth; i++) {
-                monthRange.push(i);
-            }
-        }
-        expectedMonthCount = monthRange.length || 1;
-        
+		const startMonth = parseInt(document.getElementById('height-start-month').value);
+		const endMonth = parseInt(document.getElementById('height-end-month').value);
+		const baseYear = parseInt(document.getElementById('height-year').value);
+		const months = [
+			'january', 'february', 'march', 'april', 'may', 'june',
+			'july', 'august', 'september', 'october', 'november', 'december'
+		];
+		const monthShortNames = [
+			'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+			'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+		];
+		const heightData = [];
+		let totalGrowth = 0;
+		let firstHeight = null;
+		let lastHeight = null;
+
+		let monthRange = [];
+		let yearTracker = baseYear;
+		if (endMonth >= startMonth) {
+			for (let i = startMonth; i <= endMonth; i++) {
+				monthRange.push({ index: i, year: baseYear });
+			}
+		} else {
+			for (let i = startMonth; i < 12; i++) {
+				monthRange.push({ index: i, year: baseYear });
+			}
+			yearTracker++;
+			for (let i = 0; i <= endMonth; i++) {
+				monthRange.push({ index: i, year: yearTracker });
+			}
+		}
+
+		monthRange.forEach(({ index, year }) => {
+			const month = months[index];
+			const displayMonth = `${monthShortNames[index]} ${year % 100}`; // e.g., "FEB 25"
+			const heightInput = document.getElementById(`height-${month}`);
+			const height = parseFloat(heightInput?.value) || 0;
+			if (height > 0) {
+				heightData.push({ month: displayMonth, height: height.toFixed(1) });
+				if (firstHeight === null) firstHeight = height;
+				lastHeight = height;
+			}
+		});
+
+		if (firstHeight !== null && lastHeight !== null && firstHeight !== lastHeight) {
+			totalGrowth = (lastHeight - firstHeight).toFixed(1);
+		}
+
+		currentHeightGrowthData = heightData;
+		currentTotalGrowth = totalGrowth;
+		
         const reportHtml = `
             <div class="header">
                 <div class="logo">${logoHtml}</div>
@@ -1547,7 +1683,6 @@ printBtn.addEventListener('click', () => {
                                 </div>
                             `).join('')}
                             <div class="data-row highlight">
-                                <span>Match Attendance Rate:</span>
                                 <span>${matchRate}</span>
                             </div>
                             <div class="progress-bar">
@@ -1730,7 +1865,7 @@ printBtn.addEventListener('click', () => {
         }
     });
 
-	 function generateReport() {
+	function generateReport() {
 		if (!selectedPlayerData) {
 			showStatus('No player data available to generate report.', 'error');
 			return;
@@ -1748,39 +1883,39 @@ printBtn.addEventListener('click', () => {
 			// Collect height growth data
 			const startMonth = parseInt(document.getElementById('height-start-month').value);
 			const endMonth = parseInt(document.getElementById('height-end-month').value);
-			const heightYear = parseInt(document.getElementById('height-year').value);
+			const baseYear = parseInt(document.getElementById('height-year').value);
 			const months = [
 				'january', 'february', 'march', 'april', 'may', 'june',
 				'july', 'august', 'september', 'october', 'november', 'december'
 			];
-			const monthDisplayNames = [
-				'January', 'February', 'March', 'April', 'May', 'June',
-				'July', 'August', 'September', 'October', 'November', 'December'
+			const monthShortNames = [
+				'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+				'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
 			];
 			const heightData = [];
 			let totalGrowth = 0;
 			let firstHeight = null;
 			let lastHeight = null;
 
-			// Determine the range of months
 			let monthRange = [];
+			let yearTracker = baseYear;
 			if (endMonth >= startMonth) {
 				for (let i = startMonth; i <= endMonth; i++) {
-					monthRange.push(i);
+					monthRange.push({ index: i, year: baseYear });
 				}
 			} else {
 				for (let i = startMonth; i < 12; i++) {
-					monthRange.push(i);
+					monthRange.push({ index: i, year: baseYear });
 				}
+				yearTracker++;
 				for (let i = 0; i <= endMonth; i++) {
-					monthRange.push(i);
+					monthRange.push({ index: i, year: yearTracker });
 				}
 			}
 
-			// Collect height data for the selected months
-			monthRange.forEach((monthIndex) => {
-				const month = months[monthIndex];
-				const displayMonth = monthDisplayNames[monthIndex];
+			monthRange.forEach(({ index, year }) => {
+				const month = months[index];
+				const displayMonth = `${monthShortNames[index]} ${year % 100}`; // e.g., "AUG 24"
 				const heightInput = document.getElementById(`height-${month}`);
 				const height = parseFloat(heightInput?.value) || 0;
 				if (height > 0) {
@@ -1794,10 +1929,44 @@ printBtn.addEventListener('click', () => {
 				totalGrowth = (lastHeight - firstHeight).toFixed(1);
 			}
 
-			// Store the height data and total growth globally
 			currentHeightGrowthData = heightData;
 			currentTotalGrowth = totalGrowth;
 
+			const heightSectionHTML = `
+				<div class="mb-8">
+					<h3 class="font-bold text-xl mb-4 text-primary">Height Growth Over Season (${baseYear}${endMonth < startMonth ? `-${yearTracker}` : ''})</h3>
+					<div class="border rounded-lg p-2">
+						<div class="space-y-2">
+							<table class="w-full text-left">
+								<thead>
+									<tr class="border-b">
+										<th class="py-2 px-4">Month</th>
+										${heightData.map(data => `
+											<th class="py-2 px-4">${data.month}</th>
+										`).join('')}
+									</tr>
+								</thead>
+								<tbody>
+									<tr class="border-b">
+										<td class="py-2 px-4">Height (cm)</td>
+										${heightData.length > 0 ? heightData.map(data => `
+											<td class="py-2 px-4">${data.height}</td>
+										`).join('') : `
+											<td colspan="${monthRange.length || 1}" class="py-2 px-4 text-center text-gray-500">No height data available.</td>
+										`}
+									</tr>
+									${heightData.length > 1 && totalGrowth !== 0 ? `
+										<tr class="font-semibold text-primary">
+											<td class="py-2 px-4">Total Growth:</td>
+											<td colspan="${monthRange.length}" class="py-2 px-4">${totalGrowth > 0 ? '+' : ''}${totalGrowth} cm</td>
+										</tr>
+									` : ''}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			`;
 			// Rest of the generateReport function remains the same...
 			function formatExcelDate(excelDate) {
 				if (!excelDate) return 'N/A';
@@ -1888,7 +2057,7 @@ printBtn.addEventListener('click', () => {
 				: '<div class="w-full h-full bg-gray-200 flex items-center justify-center border-2 border-gray-300"><span class="text-gray-500">No Photo</span></div>';
 			let positionHTML = playerInfo.position ? `<p class="text-gray-600">Position: ${playerInfo.position}</p>` : '';
 
-			const reportHTML = `
+		   const reportHTML = `
 				<div class="bg-white text-black p-8 print:p-[0.5cm] w-full max-w-[19cm] mx-auto" id="report-container" style="height: auto; overflow: visible; page-break-inside: auto; break-inside: auto;">
 					<div class="mb-6 border-b-2 border-primary pb-4">
 						<div class="grid grid-cols-6 gap-4 mb-4">
@@ -1910,39 +2079,7 @@ printBtn.addEventListener('click', () => {
 						</div>
 					</div>
 					
-					<div class="mb-8">
-						<h3 class="font-bold text-xl mb-4 text-primary">Height Growth Over Season (${heightYear})</h3>
-						<div class="border rounded-lg p-2">
-							<div class="space-y-2">
-								<table class="w-full text-left">
-									<thead>
-										<tr class="border-b">
-											<th class="py-2 px-4">Month</th>
-											${heightData.map(data => `
-												<th class="py-2 px-4">${data.month}</th>
-											`).join('')}
-										</tr>
-									</thead>
-									<tbody>
-										<tr class="border-b">
-											<td class="py-2 px-4">Height (cm)</td>
-											${heightData.length > 0 ? heightData.map(data => `
-												<td class="py-2 px-4">${data.height}</td>
-											`).join('') : `
-												<td colspan="${monthRange.length}" class="py-2 px-4 text-center text-gray-500">No height data available.</td>
-											`}
-										</tr>
-										${heightData.length > 1 && totalGrowth !== 0 ? `
-											<tr class="font-semibold text-primary">
-												<td class="py-2 px-4">Total Growth:</td>
-												<td colspan="${monthRange.length}" class="py-2 px-4">${totalGrowth > 0 ? '+' : ''}${totalGrowth} cm</td>
-											</tr>
-										` : ''}
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
+					${heightSectionHTML}
 					
 					<div class="mb-8">
 						<h3 class="font-bold text-xl mb-4 text-primary">Player Attendance</h3>
