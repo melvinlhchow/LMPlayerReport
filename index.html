@@ -204,20 +204,30 @@
                 </div>
                 
                 <!-- File Upload Section -->
-                <div id="player-file-input" class="mb-6 space-y-4 hidden">
-                    <div>
-                        <label class="block text-sm font-medium mb-1" for="xlsFile">Upload Player Data (XLS/XLSX)</label>
-                        <input type="file" id="xlsFile" accept=".xls,.xlsx" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-secondary cursor-pointer" />
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">XLS file should include: First Name, Last Name, Date of Birth, etc.</p>
-                    </div>
-                    <div id="playerSelectContainer" class="hidden">
-                        <label class="block text-sm font-medium mb-1" for="playerSelect">Select Player</label>
-                        <select id="playerSelect" class="w-full rounded-md border-gray-300 shadow-sm p-2 bg-white dark:bg-gray-700">
-                            <option value="">Select a player...</option>
-                        </select>
-                    </div>
-                </div>
-                
+				<div id="player-file-input" class="mb-6 space-y-4 hidden">
+					<div>
+						<label class="block text-sm font-medium mb-1" for="xlsFile">Upload Player Data (XLS/XLSX)</label>
+						<input type="file" id="xlsFile" accept=".xls,.xlsx" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-secondary cursor-pointer" />
+						<div class="mt-2">
+							<a href="https://melvinlhchow.github.io/LMPlayerReport/player_data_template.xlsx" 
+							   download="player_data_template.xlsx" 
+							   class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary transition-colors">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+								</svg>
+								Download Excel Template
+							</a>
+						</div>
+						<p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Please use the provided template for data input to ensure compatibility.</p>
+					</div>
+					<div id="playerSelectContainer" class="hidden">
+						<label class="block text-sm font-medium mb-1" for="playerSelect">Select Player</label>
+						<select id="playerSelect" class="w-full rounded-md border-gray-300 shadow-sm p-2 bg-white dark:bg-gray-700">
+							<option value="">Select a player...</option>
+						</select>
+					</div>
+				</div>
+								
                 <!-- Manual Player Data Input -->
                 <div id="player-manual-input" class="mb-6 space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
