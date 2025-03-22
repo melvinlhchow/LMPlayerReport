@@ -665,7 +665,25 @@
 		}
 		return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 	}
-
+	
+	function getMonthIndex(monthName) {
+		if (!monthName) return -1;
+		const monthMap = {
+			'jan': 0, 'january': 0,
+			'feb': 1, 'february': 1,
+			'mar': 2, 'march': 2,
+			'apr': 3, 'april': 3,
+			'may': 4, 'may': 4,
+			'jun': 5, 'june': 5,
+			'jul': 6, 'july': 6,
+			'aug': 7, 'august': 7,
+			'sep': 8, 'september': 8,
+			'oct': 9, 'october': 9,
+			'nov': 10, 'november': 10,
+			'dec': 11, 'december': 11
+		};
+		return monthMap[monthName.toLowerCase()] ?? -1;
+	}
     // DOM elements
     const manualPlayerDataRadio = document.getElementById('manual-player-data');
     const filePlayerDataRadio = document.getElementById('file-player-data');
@@ -905,16 +923,15 @@
 
 	// Enhanced player selection to populate all fields
 	playerSelect.addEventListener('change', () => {
-		const selectedIndex = playerSelect.value;
-		if (selectedIndex === '') {
-			selectedPlayerData = null;
-			resetBtn.click(); // Reset form to defaults
-			return;
-		}
-		selectedPlayerData = playersData[selectedIndex];
-		const player = selectedPlayerData;
-		showStatus(`Selected player: ${player['First Name'] || ''} ${player['Last Name'] || ''}`, 'info');
-
+    const selectedIndex = playerSelect.value;
+    if (selectedIndex === '') {
+        selectedPlayerData = null;
+        resetBtn.click(); // Reset form to defaults
+        return;
+    }
+    selectedPlayerData = playersData[selectedIndex];
+    const player = selectedPlayerData;
+    showStatus(`Selected player: ${player['First Name'] || ''} ${player['Last Name'] || ''}`, 'info');
 
     // Populate manual input fields (for reference)
     manualFirstName.value = player['First Name'] || '';
@@ -970,42 +987,76 @@
     document.getElementById('technical-director').value = player['Technical Director'] || 'Darren Bowman';
     document.getElementById('technical-director-title').value = player['Technical Director Title'] || 'Technical Director';
 
-	// Height Growth Data
+    // Height Growth Data
     const heightYear = player['Height Year'] || new Date().getFullYear();
     document.getElementById('height-year').value = heightYear;
-    const monthShortNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-    const monthFullNames = [
+
+    const months = [
         'january', 'february', 'march', 'april', 'may', 'june',
         'july', 'august', 'september', 'october', 'november', 'december'
     ];
-    let minMonth = 0, maxMonth = 11;
+    const monthShortNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+    // Collect height data from the uploaded file
+    let heightValues = [];
     monthShortNames.forEach((shortMonth, index) => {
         const excelColumn = `${shortMonth.charAt(0).toUpperCase() + shortMonth.slice(1)} Height`;
         const height = parseFloat(player[excelColumn]) || 0;
-        const fullMonth = monthFullNames[index];
-        const input = document.getElementById(`height-${fullMonth}`);
-        if (input) {
-            input.value = height > 0 ? height : '';
-            if (height > 0) {
-                minMonth = Math.min(minMonth, index);
-                maxMonth = Math.max(maxMonth, index);
-            }
+        if (height > 0) {
+            heightValues.push({ month: shortMonth, index: index, height: height });
         }
     });
-    document.getElementById('height-start-month').value = minMonth;
-    document.getElementById('height-end-month').value = maxMonth;
-    generateHeightInputs(minMonth, maxMonth); // Regenerate inputs with populated values
-    monthShortNames.slice(minMonth, maxMonth + 1).forEach((shortMonth, index) => {
-        const excelColumn = `${shortMonth.charAt(0).toUpperCase() + shortMonth.slice(1)} Height`;
-        const height = parseFloat(player[excelColumn]) || 0;
-        const fullMonth = monthFullNames[index + minMonth];
-        const input = document.getElementById(`height-${fullMonth}`);
-        if (input) input.value = height > 0 ? height : '';
+
+    // Get user-defined start and end months from the data
+    const userStartMonth = player['Height Start Month']?.trim();
+    const userEndMonth = player['Height End Month']?.trim();
+    let startMonthIdx = getMonthIndex(userStartMonth);
+    let endMonthIdx = getMonthIndex(userEndMonth);
+
+    // Validate user-defined months; fall back to data-driven range if invalid
+    if (startMonthIdx === -1 || endMonthIdx === -1) {
+        if (heightValues.length > 0) {
+            // Default behavior: Use the first and last months with data
+            heightValues.sort((a, b) => a.index - b.index);
+            startMonthIdx = heightValues[0].index;
+            endMonthIdx = heightValues[heightValues.length - 1].index;
+        } else {
+            // No height data; use default range (January to June)
+            startMonthIdx = 0; // January
+            endMonthIdx = 5;   // June
+        }
+    }
+
+    // Update the start and end month dropdowns
+    document.getElementById('height-start-month').value = startMonthIdx;
+    document.getElementById('height-end-month').value = endMonthIdx;
+
+    // Regenerate height input fields based on the selected range
+    generateHeightInputs(startMonthIdx, endMonthIdx);
+
+    // Populate height inputs with year adjustment
+    let baseYear = parseInt(heightYear);
+    let yearAdjusted = baseYear;
+    heightValues.forEach(({ month, height, index }) => {
+        const inputId = `height-${months[index]}`;
+        const heightInput = document.getElementById(inputId);
+        if (heightInput) {
+            // If end month is before start month and we're past December, increment year
+            if (endMonthIdx < startMonthIdx && index <= endMonthIdx) {
+                yearAdjusted = baseYear + 1;
+            } else {
+                yearAdjusted = baseYear;
+            }
+            heightInput.value = height.toFixed(1);
+        }
     });
 });
-
+	
+	
+	
+	
 // Helper function to format Excel date to input date (YYYY-MM-DD)
-function formatExcelDateToInput(excelDate) {
+	function formatExcelDateToInput(excelDate) {
     if (!excelDate) return '';
     if (typeof excelDate === 'number') {
         const jsDate = new Date((excelDate - 1) * 86400000 + new Date(1900, 0, 1).getTime());
@@ -1013,9 +1064,9 @@ function formatExcelDateToInput(excelDate) {
     }
     const date = new Date(excelDate);
     return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
-}
+	}
 
-function formatExcelDateToInput(serial) {
+	function formatExcelDateToInput(serial) {
     if (!serial || isNaN(serial)) return '';
     const excelEpoch = new Date(Date.UTC(1899, 11, 31));
     const days = Math.floor(serial);
@@ -1025,7 +1076,7 @@ function formatExcelDateToInput(serial) {
         date.setUTCDate(date.getUTCDate() - 1);
     }
     return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
-}
+	}
 
     portraitFileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -1066,7 +1117,7 @@ function formatExcelDateToInput(serial) {
         generateReport();
     });
 
-resetBtn.addEventListener('click', () => {
+	resetBtn.addEventListener('click', () => {
     // Reset player data inputs
     manualFirstName.value = '';
     manualLastName.value = '';
@@ -1123,9 +1174,9 @@ resetBtn.addEventListener('click', () => {
     updateBeforeUnloadListener();
 
     showStatus('Form reset successfully!', 'success');
-});
+	});
 
-printBtn.addEventListener('click', () => {
+	printBtn.addEventListener('click', () => {
     if (!currentReportHTML) {
         showStatus('Please generate a report first.', 'error');
         return;
@@ -2003,54 +2054,54 @@ printBtn.addEventListener('click', () => {
 				return;
 			}
 
-			// Collect height growth data (unchanged)
-			const startMonth = parseInt(document.getElementById('height-start-month').value);
-			const endMonth = parseInt(document.getElementById('height-end-month').value);
-			const baseYear = parseInt(document.getElementById('height-year').value);
-			const months = [
-				'january', 'february', 'march', 'april', 'may', 'june',
-				'july', 'august', 'september', 'october', 'november', 'december'
-			];
-			const monthShortNames = [
-				'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-				'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
-			];
-			const heightData = [];
-			let totalGrowth = 0;
-			let firstHeight = null;
-			let lastHeight = null;
+			// Collect height growth data
+				const startMonth = parseInt(document.getElementById('height-start-month').value);
+				const endMonth = parseInt(document.getElementById('height-end-month').value);
+				const baseYear = parseInt(document.getElementById('height-year').value);
+				const months = [
+					'january', 'february', 'march', 'april', 'may', 'june',
+					'july', 'august', 'september', 'october', 'november', 'december'
+				];
+				const monthShortNames = [
+					'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+					'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+				];
+				const heightData = [];
+				let totalGrowth = 0;
+				let firstHeight = null;
+				let lastHeight = null;
 
-			let monthRange = [];
-			let yearTracker = baseYear;
-			if (endMonth >= startMonth) {
-				for (let i = startMonth; i <= endMonth; i++) {
-					monthRange.push({ index: i, year: baseYear });
+				let monthRange = [];
+				let yearTracker = baseYear;
+				if (endMonth >= startMonth) {
+					for (let i = startMonth; i <= endMonth; i++) {
+						monthRange.push({ index: i, year: baseYear });
+					}
+				} else {
+					for (let i = startMonth; i < 12; i++) {
+						monthRange.push({ index: i, year: baseYear });
+					}
+					yearTracker++;
+					for (let i = 0; i <= endMonth; i++) {
+						monthRange.push({ index: i, year: yearTracker });
+					}
 				}
-			} else {
-				for (let i = startMonth; i < 12; i++) {
-					monthRange.push({ index: i, year: baseYear });
-				}
-				yearTracker++;
-				for (let i = 0; i <= endMonth; i++) {
-					monthRange.push({ index: i, year: yearTracker });
-				}
-			}
 
-			monthRange.forEach(({ index, year }) => {
-				const month = months[index];
-				const displayMonth = `${monthShortNames[index]} ${year % 100}`;
-				const heightInput = document.getElementById(`height-${month}`);
-				const height = parseFloat(heightInput?.value) || 0;
-				if (height > 0) {
-					heightData.push({ month: displayMonth, height: height.toFixed(1) });
-					if (firstHeight === null) firstHeight = height;
-					lastHeight = height;
-				}
-			});
+				monthRange.forEach(({ index, year }) => {
+					const month = months[index];
+					const displayMonth = `${monthShortNames[index]} ${year % 100}`;
+					const heightInput = document.getElementById(`height-${month}`);
+					const height = parseFloat(heightInput?.value) || 0;
+					if (height > 0) {
+						heightData.push({ month: displayMonth, height: height.toFixed(1) });
+						if (firstHeight === null) firstHeight = height;
+						lastHeight = height;
+					}
+				});
 
-			if (firstHeight !== null && lastHeight !== null && firstHeight !== lastHeight) {
-				totalGrowth = (lastHeight - firstHeight).toFixed(1);
-			}
+				if (firstHeight !== null && lastHeight !== null && firstHeight !== lastHeight) {
+					totalGrowth = (lastHeight - firstHeight).toFixed(1);
+				}
 
 			currentHeightGrowthData = heightData;
 			currentTotalGrowth = totalGrowth;
@@ -2527,7 +2578,6 @@ function downloadAllSessionData() {
 
 
 </script>
-    
-
+   
 </body>
 </html>
