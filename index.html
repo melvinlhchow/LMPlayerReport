@@ -614,11 +614,14 @@
         </div>
         
         <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-md mt-6">
-            <h2 class="text-xl font-semibold mb-4 text-primary">Saved Reports</h2>
-            <div id="saved-reports-list" class="space-y-2">
-                <p class="text-gray-500 dark:text-gray-400">No reports saved yet.</p>
-            </div>
-        </div>
+			<h2 class="text-xl font-semibold mb-4 text-primary">Saved Reports</h2>
+			<div class="flex justify-between items-center">
+				<button id="download-session-btn" class="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Download All Saved Data</button>
+			</div>
+			<div id="saved-reports-list" class="space-y-2">
+				<p class="text-gray-500 dark:text-gray-400">No reports saved yet.</p>
+			</div>
+		</div>
         
         <!-- Status Message -->
         <div id="status-message" class="mt-6 py-2 px-4 rounded-md hidden"></div>
@@ -650,7 +653,20 @@
 	let savedReports = [];
 	let currentHeightGrowthData = []; // Store height growth data
 	let currentTotalGrowth = 0; // Store total growth
-
+	let hasDownloadedSessionData = false; // Track if session data has been downloaded
+			
+	// Add formatExcelDate here
+	function formatExcelDate(serial) {
+		if (!serial || isNaN(serial)) return 'N/A';
+		const excelEpoch = new Date(Date.UTC(1899, 11, 31));
+		const days = Math.floor(serial);
+		const milliseconds = Math.round((serial - days) * 86400000);
+		const date = new Date(excelEpoch.getTime() + (days * 86400000) + milliseconds);
+		if (serial < 60) {
+			date.setUTCDate(date.getUTCDate() - 1);
+		}
+		return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+	}
 
     // DOM elements
     const manualPlayerDataRadio = document.getElementById('manual-player-data');
@@ -889,17 +905,18 @@
 		}
 	});
 
-// Enhanced player selection to populate all fields
-playerSelect.addEventListener('change', () => {
-    const selectedIndex = playerSelect.value;
-    if (selectedIndex === '') {
-        selectedPlayerData = null;
-        resetBtn.click(); // Reset form to defaults
-        return;
-    }
-    selectedPlayerData = playersData[selectedIndex];
-    const player = selectedPlayerData;
-    showStatus(`Selected player: ${player['First Name'] || ''} ${player['Last Name'] || ''}`, 'info');
+	// Enhanced player selection to populate all fields
+	playerSelect.addEventListener('change', () => {
+		const selectedIndex = playerSelect.value;
+		if (selectedIndex === '') {
+			selectedPlayerData = null;
+			resetBtn.click(); // Reset form to defaults
+			return;
+		}
+		selectedPlayerData = playersData[selectedIndex];
+		const player = selectedPlayerData;
+		showStatus(`Selected player: ${player['First Name'] || ''} ${player['Last Name'] || ''}`, 'info');
+
 
     // Populate manual input fields (for reference)
     manualFirstName.value = player['First Name'] || '';
@@ -1000,6 +1017,17 @@ function formatExcelDateToInput(excelDate) {
     return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
 }
 
+function formatExcelDateToInput(serial) {
+    if (!serial || isNaN(serial)) return '';
+    const excelEpoch = new Date(Date.UTC(1899, 11, 31));
+    const days = Math.floor(serial);
+    const milliseconds = Math.round((serial - days) * 86400000);
+    const date = new Date(excelEpoch.getTime() + (days * 86400000) + milliseconds);
+    if (serial < 60) {
+        date.setUTCDate(date.getUTCDate() - 1);
+    }
+    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+}
 
     portraitFileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -1040,17 +1068,21 @@ function formatExcelDateToInput(excelDate) {
         generateReport();
     });
 
-    resetBtn.addEventListener('click', () => {
+resetBtn.addEventListener('click', () => {
+    // Reset player data inputs
     manualFirstName.value = '';
     manualLastName.value = '';
     manualDob.value = '';
     manualPosition.value = '';
-    sliders.forEach(id => {
-        const slider = document.getElementById(id);
-        const valueDisplay = document.getElementById(`${id}-value`);
-        slider.value = 3;
-        valueDisplay.textContent = 3;
-    });
+    portraitFileInput.value = '';
+    clubLogoFileInput.value = '';
+    portraitImageData = null;
+    clubLogoData = null;
+    playerSelect.value = '';
+    selectedPlayerData = null;
+    playerSelectContainer.classList.add('hidden');
+
+    // Reset attendance inputs
     document.getElementById('total-training-sessions').value = 0;
     document.getElementById('training-sessions-attended').value = 0;
     document.getElementById('total-training-minutes').value = 0;
@@ -1058,38 +1090,42 @@ function formatExcelDateToInput(excelDate) {
     document.getElementById('matches-played').value = 0;
     document.getElementById('total-match-minutes').value = 0;
     document.getElementById('match-minutes-played').value = 0;
+    document.getElementById('attendanceFile').value = '';
+
+    // Reset sliders
+    sliders.forEach(id => {
+        const slider = document.getElementById(id);
+        const valueDisplay = document.getElementById(`${id}-value`);
+        slider.value = 3;
+        valueDisplay.textContent = '3';
+    });
+
+    // Reset grades and feedback
+    document.getElementById('current-grade').value = 'A';
+    document.getElementById('target-grade').value = 'A';
     document.getElementById('targeted-feedback').value = '';
     document.getElementById('areas-improvement').value = '';
+
+    // Reset signatures
     document.getElementById('coach1-name').value = 'Melvin Chow';
     document.getElementById('coach1-title').value = 'Coach';
     document.getElementById('coach2-name').value = 'Lee Hong Lim';
     document.getElementById('coach2-title').value = 'Coach';
     document.getElementById('technical-director').value = 'Darren Bowman';
     document.getElementById('technical-director-title').value = 'Technical Director';
-    document.getElementById('current-grade').value = 'A';
-    document.getElementById('target-grade').value = 'A';
-    portraitImageData = null;
-    clubLogoData = null;
-    portraitFileInput.value = '';
-    clubLogoFileInput.value = '';
-    if (filePlayerDataRadio.checked) {
-        selectedPlayerData = null;
-        playerSelect.value = '';
-    }
+
+    // Reset preview
     reportPreview.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-12">Your report preview will appear here.</div>';
     pdfControls.classList.add('hidden');
-    // Reset height growth inputs
-    document.getElementById('height-start-month').value = '0'; // Reset to January
-    document.getElementById('height-end-month').value = '5'; // Reset to June
-    document.getElementById('height-year').value = currentYear; // Reset to current year
-    generateHeightInputs(0, 5); // Regenerate inputs for January to June
-    const heightInputs = heightGrowthInputsDiv.querySelectorAll('input');
-    heightInputs.forEach(input => input.value = '');
-    // Reset height growth global variables
-    currentHeightGrowthData = [];
-    currentTotalGrowth = 0;
-    showStatus('Form reset successfully.', 'success');
-	});	
+
+    // Reset the download flag if there are no saved reports
+    if (savedReports.length === 0) {
+        hasDownloadedSessionData = false;
+    }
+    updateBeforeUnloadListener();
+
+    showStatus('Form reset successfully!', 'success');
+});
 
 printBtn.addEventListener('click', () => {
     if (!currentReportHTML) {
@@ -1875,22 +1911,96 @@ printBtn.addEventListener('click', () => {
         }
     });
 
-	function generateReport() {
-		if (!selectedPlayerData) {
-			showStatus('No player data available to generate report.', 'error');
-			return;
+	function getCurrentSessionData() {
+		const data = selectedPlayerData ? { ...selectedPlayerData } : {};
+
+		if (document.getElementById('manual-player-data').checked) {
+			data['First Name'] = document.getElementById('manual-first-name').value || '';
+			data['Last Name'] = document.getElementById('manual-last-name').value || '';
+			data['Date of Birth'] = document.getElementById('manual-dob').value || '';
+			data['Position'] = document.getElementById('manual-position').value || '';
 		}
+
+		data['Total Training Sessions'] = parseInt(document.getElementById('total-training-sessions').value) || 0;
+		data['Training Sessions Attended'] = parseInt(document.getElementById('training-sessions-attended').value) || 0;
+		data['Total Training Minutes'] = parseInt(document.getElementById('total-training-minutes').value) || 0;
+		data['Total Matches'] = parseInt(document.getElementById('total-matches').value) || 0;
+		data['Matches Played'] = parseInt(document.getElementById('matches-played').value) || 0;
+		data['Total Match Minutes'] = parseInt(document.getElementById('total-match-minutes').value) || 0;
+		data['Match Minutes Played'] = parseInt(document.getElementById('match-minutes-played').value) || 0;
+
+		sliders.forEach(id => {
+			const slider = document.getElementById(id);
+			const label = id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+			data[label] = parseInt(slider.value) || 3;
+		});
+
+		data['Current Grade'] = document.getElementById('current-grade').value || 'A';
+		data['Target Grade'] = document.getElementById('target-grade').value || 'A';
+		data['Targeted Feedback'] = document.getElementById('targeted-feedback').value || '';
+		data['Areas of Improvement'] = document.getElementById('areas-improvement').value || '';
+		data['Coach 1 Name'] = document.getElementById('coach1-name').value || 'Melvin Chow';
+		data['Coach 1 Title'] = document.getElementById('coach1-title').value || 'Coach';
+		data['Coach 2 Name'] = document.getElementById('coach2-name').value || 'Lee Hong Lim';
+		data['Coach 2 Title'] = document.getElementById('coach2-title').value || 'Coach';
+		data['Technical Director'] = document.getElementById('technical-director').value || 'Darren Bowman';
+		data['Technical Director Title'] = document.getElementById('technical-director-title').value || 'Technical Director';
+
+		const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+		months.forEach((month, index) => {
+			const input = document.getElementById(`height-${month}uary`) || document.getElementById(`height-${month}`);
+			data[`${month.charAt(0).toUpperCase() + month.slice(1)} Height`] = input && input.value ? parseFloat(input.value) : '';
+		});
+		data['Height Year'] = document.getElementById('height-year').value || new Date().getFullYear();
+
+		return data;
+	}
+
+	function formatExcelDate(serial) {
+		if (!serial || isNaN(serial)) return 'N/A'; // Handle invalid or missing dates
+		const excelEpoch = new Date(Date.UTC(1899, 11, 31)); // Excel's epoch is Dec 31, 1899 (adjusted for UTC)
+		const days = Math.floor(serial); // Integer part is days
+		const milliseconds = Math.round((serial - days) * 86400000); // Fractional part is time in milliseconds
+		const date = new Date(excelEpoch.getTime() + (days * 86400000) + milliseconds);
+		// Adjust for Excel's leap year bug (1900 is incorrectly treated as a leap year)
+		if (serial < 60) {
+			date.setUTCDate(date.getUTCDate() - 1);
+		}
+		return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+	}
+
+	function generateReport() {
 		showStatus('Generating report...', 'info');
 
 		try {
-			const playerInfo = {
-				firstName: selectedPlayerData['First Name'] || 'Unknown',
-				lastName: selectedPlayerData['Last Name'] || 'Player',
-				sdob: formatExcelDate(selectedPlayerData['Date of Birth']),
-				position: selectedPlayerData['Position'] || ''
-			};
+			// Determine player data source
+			let playerInfo;
+			if (manualPlayerDataRadio.checked) {
+				const firstName = manualFirstName.value.trim();
+				const lastName = manualLastName.value.trim();
+				if (!firstName && !lastName) {
+					showStatus('Please enter a first name or last name for manual input.', 'error');
+					return;
+				}
+				playerInfo = {
+					firstName: firstName || 'Unknown',
+					lastName: lastName || 'Player',
+					sdob: manualDob.value ? new Date(manualDob.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
+					position: manualPosition.value || ''
+				};
+			} else if (selectedPlayerData) {
+				playerInfo = {
+					firstName: selectedPlayerData['First Name'] || 'Unknown',
+					lastName: selectedPlayerData['Last Name'] || 'Player',
+					sdob: formatExcelDate(selectedPlayerData['Date of Birth']),
+					position: selectedPlayerData['Position'] || ''
+				};
+			} else {
+				showStatus('No player data available to generate report.', 'error');
+				return;
+			}
 
-			// Collect height growth data
+			// Collect height growth data (unchanged)
 			const startMonth = parseInt(document.getElementById('height-start-month').value);
 			const endMonth = parseInt(document.getElementById('height-end-month').value);
 			const baseYear = parseInt(document.getElementById('height-year').value);
@@ -1925,7 +2035,7 @@ printBtn.addEventListener('click', () => {
 
 			monthRange.forEach(({ index, year }) => {
 				const month = months[index];
-				const displayMonth = `${monthShortNames[index]} ${year % 100}`; // e.g., "AUG 24"
+				const displayMonth = `${monthShortNames[index]} ${year % 100}`;
 				const heightInput = document.getElementById(`height-${month}`);
 				const height = parseFloat(heightInput?.value) || 0;
 				if (height > 0) {
@@ -1977,28 +2087,8 @@ printBtn.addEventListener('click', () => {
 					</div>
 				</div>
 			`;
-			// Rest of the generateReport function remains the same...
-			function formatExcelDate(excelDate) {
-				if (!excelDate) return 'N/A';
-				try {
-					if (typeof excelDate === 'number' || !isNaN(Number(excelDate))) {
-						const serialDate = Number(excelDate);
-						if (serialDate < 1 || serialDate > 2958465) return String(excelDate);
-						const jsDate = new Date((serialDate - 1) * 86400000 + new Date(1900, 0, 1).getTime());
-						if (isNaN(jsDate.getTime())) return String(excelDate);
-						return jsDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-					} else if (typeof excelDate === 'string') {
-						const date = new Date(excelDate);
-						if (!isNaN(date.getTime())) return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-						return excelDate;
-					}
-					return String(excelDate);
-				} catch (error) {
-					console.error('Error formatting date:', error);
-					return String(excelDate);
-				}
-			}
 
+			// Rest of the report generation (attendance, ratings, etc.) remains largely unchanged
 			const attendanceData = {
 				training: {
 					totalSessions: parseInt(document.getElementById('total-training-sessions')?.value || 0),
@@ -2021,13 +2111,9 @@ printBtn.addEventListener('click', () => {
 				: 0;
 
 			let attendanceBarColor = 'bg-gray-500';
-			if (trainingAttendancePercentage >= 80) {
-				attendanceBarColor = 'bg-green-500';
-			} else if (trainingAttendancePercentage > 60 && trainingAttendancePercentage < 80) {
-				attendanceBarColor = 'bg-amber-500';
-			} else if (trainingAttendancePercentage <= 60) {
-				attendanceBarColor = 'bg-red-500';
-			}
+			if (trainingAttendancePercentage >= 80) attendanceBarColor = 'bg-green-500';
+			else if (trainingAttendancePercentage > 60) attendanceBarColor = 'bg-amber-500';
+			else attendanceBarColor = 'bg-red-500';
 
 			const ratings = {};
 			sliders.forEach(id => {
@@ -2067,7 +2153,7 @@ printBtn.addEventListener('click', () => {
 				: '<div class="w-full h-full bg-gray-200 flex items-center justify-center border-2 border-gray-300"><span class="text-gray-500">No Photo</span></div>';
 			let positionHTML = playerInfo.position ? `<p class="text-gray-600">Position: ${playerInfo.position}</p>` : '';
 
-		   const reportHTML = `
+			const reportHTML = `
 				<div class="bg-white text-black p-8 print:p-[0.5cm] w-full max-w-[19cm] mx-auto" id="report-container" style="height: auto; overflow: visible; page-break-inside: auto; break-inside: auto;">
 					<div class="mb-6 border-b-2 border-primary pb-4">
 						<div class="grid grid-cols-6 gap-4 mb-4">
@@ -2194,64 +2280,71 @@ printBtn.addEventListener('click', () => {
 				</div>
 			`;
 
-        currentReportHTML = reportHTML;
-        reportPreview.innerHTML = reportHTML;
-        pdfControls.classList.remove('hidden');
+			// Set preview and save report immediately
+			currentReportHTML = reportHTML;
+			reportPreview.innerHTML = reportHTML;
+			pdfControls.classList.remove('hidden');
 
-        const canvas = document.getElementById('skills-radar');
-        if (!canvas || !canvas.getContext) {
-            console.error('Canvas element not found or context unavailable');
-            showStatus('Error: Skills chart could not be rendered.', 'error');
-            return;
-        }
-        const ctx = canvas.getContext('2d');
-        if (window.skillsChart) window.skillsChart.destroy();
+			const playerName = `${playerInfo.firstName} ${playerInfo.lastName}`;
+			const reportData = getCurrentSessionData();
+			const reportEntry = {
+				name: playerName,
+				html: reportHTML,
+				data: reportData,
+				timestamp: new Date().toISOString()
+			};
+			savedReports.push(reportEntry);
+			updateSavedReportsList();
 
-        window.skillsChart = new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: ['Game Intelligence', 'Technical Ability', 'Physical Capacity', 'Social Competence'],
-                datasets: [{
-                    label: 'Player Skills',
-                    data: [gameIntelligenceAvg, technicalAbilityAvg, physicalCapacityAvg, socialCompetenceAvg],
-                    backgroundColor: 'rgba(255, 215, 0, 0.2)',
-                    borderColor: '#FFD700',
-                    pointBackgroundColor: '#FFD700',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: '#FFD700'
-                }]
-            },
-            options: {
-                animation: {
-                    onComplete: () => {
-                        const chartImage = canvas.toDataURL('image/png');
-                        currentReportHTML = currentReportHTML.replace(
-                            '<canvas id="skills-radar"></canvas>',
-                            `<img src="${chartImage}" alt="Player Evaluation Radar" style="width: 150px; height: 150px;">`
-                        );
-                        reportPreview.innerHTML = currentReportHTML;
+			// Render chart separately
+			const canvas = document.getElementById('skills-radar');
+			if (canvas && canvas.getContext) {
+				const ctx = canvas.getContext('2d');
+				if (window.skillsChart) window.skillsChart.destroy();
 
-                        const playerName = `${playerInfo.firstName} ${playerInfo.lastName}`;
-                        const reportEntry = {
-                            name: playerName,
-                            html: currentReportHTML,
-                            timestamp: new Date().toISOString()
-                        };
-                        savedReports.push(reportEntry);
-                        updateSavedReportsList();
-                        showStatus('Report generated and saved successfully!', 'success');
-                    }
-                },
-                plugins: { legend: { display: false } },
-                scales: { r: { angleLines: { display: true }, min: 0, max: 5, ticks: { stepSize: 1 } } }
-            }
-        });
-    } catch (error) {
-        console.error('Error in generateReport:', error);
-        showStatus('Error generating report: ' + error.message, 'error');
-    }
-}
+				window.skillsChart = new Chart(ctx, {
+					type: 'radar',
+					data: {
+						labels: ['Game Intelligence', 'Technical Ability', 'Physical Capacity', 'Social Competence'],
+						datasets: [{
+							label: 'Player Skills',
+							data: [gameIntelligenceAvg, technicalAbilityAvg, physicalCapacityAvg, socialCompetenceAvg],
+							backgroundColor: 'rgba(255, 215, 0, 0.2)',
+							borderColor: '#FFD700',
+							pointBackgroundColor: '#FFD700',
+							pointBorderColor: '#fff',
+							pointHoverBackgroundColor: '#fff',
+							pointHoverBorderColor: '#FFD700'
+						}]
+					},
+					options: {
+						animation: {
+							onComplete: () => {
+								const chartImage = canvas.toDataURL('image/png');
+								currentReportHTML = currentReportHTML.replace(
+									'<canvas id="skills-radar"></canvas>',
+									`<img src="${chartImage}" alt="Player Evaluation Radar" style="width: 150px; height: 150px;">`
+								);
+								reportPreview.innerHTML = currentReportHTML;
+								// Update the saved report with the chart image
+								reportEntry.html = currentReportHTML;
+							}
+						},
+						plugins: { legend: { display: false } },
+						scales: { r: { angleLines: { display: true }, min: 0, max: 5, ticks: { stepSize: 1 } } }
+					}
+				});
+			} else {
+				console.error('Canvas element not found or context unavailable');
+				showStatus('Skills chart could not be rendered, but report was saved.', 'warning');
+			}
+
+			showStatus('Report generated and saved successfully!', 'success');
+		} catch (error) {
+			console.error('Error in generateReport:', error);
+			showStatus('Error generating report: ' + error.message, 'error');
+		}
+	}
 
     function createRatingBar(label, value) {
         const stars = Array(5).fill(0).map((_, i) => 
@@ -2275,7 +2368,160 @@ printBtn.addEventListener('click', () => {
         }
         if (type !== 'error') setTimeout(() => statusMessage.classList.add('hidden'), 5000);
     }
-    </script>
+    document.getElementById('download-session-btn').addEventListener('click', downloadAllSessionData);
+
+function downloadAllSessionData() {
+    try {
+        // Check if there are any saved reports
+        if (savedReports.length === 0) {
+            showStatus('No saved reports available to download.', 'error');
+            return;
+        }
+
+        // Define the worksheet headers (matching the template)
+        const headers = [
+            'First Name', 'Last Name', 'Date of Birth', 'Position',
+            'Total Training Sessions', 'Training Sessions Attended', 'Total Training Minutes',
+            'Total Matches', 'Matches Played', 'Total Match Minutes', 'Match Minutes Played',
+            'Movement to Receive', 'Actions to Create', 'Actions to Disrupt',
+            'With Balance', 'With Speed', 'Execution',
+            'Speed', 'Aggressive', 'Dominant',
+            'Communication', 'Demanding', 'Confidence',
+            'Current Grade', 'Target Grade',
+            'Targeted Feedback', 'Areas of Improvement',
+            'Coach 1 Name', 'Coach 1 Title', 'Coach 2 Name', 'Coach 2 Title',
+            'Technical Director', 'Technical Director Title',
+            'Jan Height', 'Feb Height', 'Mar Height', 'Apr Height', 'May Height', 'Jun Height',
+            'Jul Height', 'Aug Height', 'Sep Height', 'Oct Height', 'Nov Height', 'Dec Height',
+            'Height Year'
+        ];
+
+        // Prepare data: one row per saved report, plus the header row
+        const dataArray = [headers];
+        savedReports.forEach(report => {
+            const rowData = headers.map(header => {
+                if (header === 'Date of Birth') {
+                    const dob = report.data[header];
+                    // If dob is a number (Excel serial date), format it; otherwise, use as-is
+                    return typeof dob === 'number' && !isNaN(dob) ? formatExcelDate(dob) : dob || '';
+                }
+                return report.data[header] || '';
+            });
+            dataArray.push(rowData);
+        });
+
+        // Include current session data if not yet saved as a report
+        const currentData = getCurrentSessionData();
+        const isCurrentDataSaved = savedReports.some(report => 
+            report.data['First Name'] === currentData['First Name'] && 
+            report.data['Last Name'] === currentData['Last Name']
+        );
+        if (!isCurrentDataSaved && (currentData['First Name'] || currentData['Last Name'])) {
+            const currentRow = headers.map(header => {
+                if (header === 'Date of Birth') {
+                    const dob = currentData[header];
+                    // If dob is a number (Excel serial date), format it; otherwise, use as-is
+                    return typeof dob === 'number' && !isNaN(dob) ? formatExcelDate(dob) : dob || '';
+                }
+                return currentData[header] || '';
+            });
+            dataArray.push(currentRow);
+        }
+
+        // Create a new workbook and worksheet
+        const ws = XLSX.utils.aoa_to_sheet(dataArray);
+
+        // Apply date format to the "Date of Birth" column (column C, index 2)
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let row = range.s.r + 1; row <= range.e.r; row++) { // Start from row 2 (skip header)
+            const cellAddress = XLSX.utils.encode_cell({ r: row, c: 2 }); // Column C (index 2)
+            if (ws[cellAddress]) {
+                // If the value is a date string, ensure Excel treats it as text
+                ws[cellAddress].t = 's'; // Set type to string to preserve the formatted date
+            }
+        }
+
+        // Auto-adjust column widths for better readability
+        ws['!cols'] = headers.map((header, index) => {
+            if (header === 'Date of Birth') return { wch: 12 }; // Set width for Date of Birth
+            if (header.includes('Height')) return { wch: 10 }; // Set width for height columns
+            if (header === 'Targeted Feedback' || header === 'Areas of Improvement') return { wch: 30 }; // Wider for feedback
+            return { wch: 15 }; // Default width for other columns
+        });
+
+        // Bold the header row
+        for (let col = range.s.c; col <= range.e.c; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+            if (ws[cellAddress]) {
+                ws[cellAddress].s = { font: { bold: true } };
+            }
+        }
+
+        // Create workbook and append sheet
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Session Data');
+
+        // Generate filename with timestamp
+        const filename = `All_Session_Data_${new Date().toISOString().slice(0,10)}.xlsx`;
+
+        // Write the file and trigger download
+        XLSX.writeFile(wb, filename);
+        hasDownloadedSessionData = true; // Set flag to true after successful download
+        showStatus('All session data downloaded successfully!', 'success');
+		} catch (error) {
+			console.error('Error downloading all session data:', error);
+			showStatus('Error downloading session data: ' + error.message, 'error');
+		}
+	}
+
+	// Function to handle the beforeunload event
+	function handleBeforeUnload(event) {
+		// Check if there are saved reports and the user hasn't downloaded the session data
+		if (savedReports.length > 0 && !hasDownloadedSessionData) {
+			// Set a custom message (note: most modern browsers ignore this and show a default message)
+			const message = 'You have unsaved session data. Please download it before closing the window to avoid losing your work.';
+			event.preventDefault();
+			event.returnValue = message; // This triggers the confirmation dialog
+			return message; // For older browsers
+		}
+	}
+
+	// Function to update the beforeunload event listener based on the current state
+	function updateBeforeUnloadListener() {
+		// Remove any existing listener to avoid duplicates
+		window.removeEventListener('beforeunload', handleBeforeUnload);
+		// Add the listener if there are saved reports and session data hasn't been downloaded
+		if (savedReports.length > 0 && !hasDownloadedSessionData) {
+			window.addEventListener('beforeunload', handleBeforeUnload);
+		}
+	}
+
+	// Update the listener whenever a report is generated
+	const originalGenerateReport = generateReport;
+	generateReport = function() {
+		originalGenerateReport();
+		updateBeforeUnloadListener();
+	};
+
+	// Update the listener whenever session data is downloaded
+	const originalDownloadAllSessionData = downloadAllSessionData;
+	downloadAllSessionData = function() {
+		originalDownloadAllSessionData();
+		updateBeforeUnloadListener();
+	};
+
+	// Update the listener whenever saved reports are modified (e.g., deleted)
+	const originalUpdateSavedReportsList = updateSavedReportsList;
+	updateSavedReportsList = function() {
+		originalUpdateSavedReportsList();
+		updateBeforeUnloadListener();
+	};
+
+	// Initial call to set up the listener
+	updateBeforeUnloadListener();
+
+
+</script>
     
 
 </body>
