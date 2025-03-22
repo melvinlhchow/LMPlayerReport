@@ -4,70 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lee Man FC Player Review Generator - README</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            line-height: 1.6;
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFD700',
+                        secondary: '#E6C200',
+                        textPrimary: '#333333'
+                    },
+                    fontFamily: {
+                        sans: ['Helvetica', 'Arial', 'sans-serif'],
+                    }
+                }
+            },
+            darkMode: 'class'
         }
-        h1 {
-            color: #333;
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
         }
-        h2 {
-            color: #555;
-        }
-        a {
-            color: #0066cc;
-        }
-        .language-toggle {
-            margin-bottom: 20px;
-        }
-        .language-toggle button {
-            padding: 10px 20px;
-            margin-right: 10px;
-            cursor: pointer;
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .language-toggle button.active {
-            background-color: #0066cc;
-            color: white;
-        }
-        .readme-section {
-            display: none;
-        }
-        .readme-section.active {
-            display: block;
-        }
-    </style>
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            document.documentElement.classList.toggle('dark', event.matches);
+        });
+    </script>
 </head>
-<body>
-    <div class="language-toggle">
-        <button id="en-btn" class="active" onclick="showLanguage('en')">English</button>
-        <button id="zh-btn" onclick="showLanguage('zh')">繁體中文</button>
-    </div>
+<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
+    <div class="container mx-auto px-4 py-6 max-w-5xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-primary mb-2">Lee Man FC Player Review Generator - README</h1>
+            <p class="text-gray-600 dark:text-gray-400">Guide to using the Player Review Generator</p>
+        </header>
+
+        <div class="mb-6">
+            <div class="flex justify-center space-x-4">
+                <button id="en-btn" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary transition-colors active:bg-secondary" onclick="showLanguage('en')">English</button>
+                <button id="zh-btn" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors active:bg-gray-700" onclick="showLanguage('zh')">繁體中文</button>
+            </div>
+        </div>
+
 
     <!-- English Version -->
-    <div id="readme-en" class="readme-section active">
-        <h1>Lee Man FC Player Review Generator</h1>
-        <p>This tool allows coaches and technical staff to generate comprehensive player review reports for Lee Man FC academy players. Follow the steps below to create a report.</p>
+            <div id="readme-en" class="readme-section bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-primary mb-4">Lee Man FC Player Review Generator</h2>
+            <p class="mb-4">This tool allows coaches and technical staff to generate comprehensive player review reports for Lee Man FC academy players. Follow the steps below to create a report.</p>
 
-        <h2>Prerequisites</h2>
-        <ul>
-            <li>A modern web browser (e.g., Chrome, Firefox, Edge).</li>
-            <li>Optional: Excel files containing player or attendance data (use the provided template for compatibility).</li>
-            <li>Optional: Player portrait photo (JPEG/PNG) and club logo (JPEG/PNG/SVG).</li>
-        </ul>
+            <h3 class="text-xl font-semibold text-primary mb-3">Prerequisites</h3>
+            <ul class="list-disc pl-5 mb-4">
+                <li>A modern web browser (e.g., Chrome, Firefox, Edge).</li>
+                <li>Optional: Excel files containing player or attendance data (use the provided template for compatibility).</li>
+                <li>Optional: Player portrait photo (JPEG/PNG) and club logo (JPEG/PNG/SVG).</li>
+            </ul>
 
-        <h2>Steps to Generate a Player Report</h2>
-        <ol>
-            <li><strong>Open the Application</strong>
-                <ul>
-                    <li>Visit the hosted application at <a href="https://melvinlhchow.github.io/LMPlayerReport/index.html">https://melvinlhchow.github.io/LMPlayerReport/index.html</a> using your web browser.</li>
-                    <li>No local setup is required as the tool is already accessible online.</li>
-                </ul>
-            </li>
+            <h3 class="text-xl font-semibold text-primary mb-3">Steps to Generate a Player Report</h3>
+            <ol class="list-decimal pl-5 space-y-4">
+                <li><strong>Open the Application</strong>
+                    <ul class="list-disc pl-5">
+                        <li>Visit the hosted application at <a href="https://melvinlhchow.github.io/LMPlayerReport/index.html" class="text-primary hover:underline">https://melvinlhchow.github.io/LMPlayerReport/index.html</a> using your web browser.</li>
+                        <li>No local setup is required as the tool is already accessible online.</li>
+                    </ul>
+                </li>
+	
+
             <li><strong>Choose Data Input Method</strong>
                 <ul>
                     <li>In the "Player Data Input" section, select one of the following:</li>
@@ -163,40 +161,40 @@
                 </ul>
             </li>
             <li><strong>Download Session Data (Optional)</strong>
-                <ul>
-                    <li>Click "Download All Saved Data" in the "Saved Reports" section to export all reports as an Excel file.</li>
-                </ul>
-            </li>
-        </ol>
+                    <ul class="list-disc pl-5">
+                        <li>Click "Download All Saved Data" in the "Saved Reports" section to export all reports as an Excel file.</li>
+                    </ul>
+                </li>
+            </ol>
 
-        <h2>Notes</h2>
-        <ul>
-            <li><strong>Reset Form:</strong> Click "Reset Form" to clear all inputs.</li>
-            <li><strong>Data Privacy:</strong> Player data is stored only for the current session and not saved between browser refreshes unless exported.</li>
-            <li><strong>Chart Rendering:</strong> The radar chart in the report requires a brief moment to render before printing.</li>
-        </ul>
-    </div>
+            <h3 class="text-xl font-semibold text-primary mb-3">Notes</h3>
+            <ul class="list-disc pl-5">
+                <li><strong>Reset Form:</strong> Click "Reset Form" to clear all inputs.</li>
+                <li><strong>Data Privacy:</strong> Player data is stored only for the current session and not saved between browser refreshes unless exported.</li>
+                <li><strong>Chart Rendering:</strong> The radar chart in the report requires a brief moment to render before printing.</li>
+            </ul>
+        </div>
 
     <!-- Chinese Version -->
-    <div id="readme-zh" class="readme-section">
-        <h1>理文足球會球員評估生成器</h1>
-        <p>此工具幫助教練及技術人員為理文足球會青訓球員生成全面的評估報告。請按照以下步驟操作。</p>
+  <div id="readme-zh" class="readme-section hidden bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-primary mb-4">理文足球會球員評估生成器</h2>
+            <p class="mb-4">此工具幫助教練及技術人員為理文足球會青訓球員生成全面的評估報告。請按照以下步驟操作。</p>
 
-        <h2>前提條件</h2>
-        <ul>
-            <li>現代網頁瀏覽器（如 Chrome、Firefox、Edge）。</li>
-            <li>可選：包含球員或出勤數據的 Excel 文件（建議使用提供的模板以確保兼容性）。</li>
-            <li>可選：球員頭像照片（JPEG/PNG）和俱樂部標誌（JPEG/PNG/SVG）。</li>
-        </ul>
+            <h3 class="text-xl font-semibold text-primary mb-3">前提條件</h3>
+            <ul class="list-disc pl-5 mb-4">
+                <li>現代網頁瀏覽器（如 Chrome、Firefox、Edge）。</li>
+                <li>可選：包含球員或出勤數據的 Excel 文件（建議使用提供的模板以確保兼容性）。</li>
+                <li>可選：球員頭像照片（JPEG/PNG）和俱樂部標誌（JPEG/PNG/SVG）。</li>
+            </ul>
 
-        <h2>生成球員報告的步驟</h2>
-        <ol>
-            <li><strong>打開應用程式</strong>
-                <ul>
-                    <li>在您的網頁瀏覽器中訪問已托管的應用程式：<a href="https://melvinlhchow.github.io/LMPlayerReport/index.html">https://melvinlhchow.github.io/LMPlayerReport/index.html</a>。</li>
-                    <li>無需本地設置，工具已可線上使用。</li>
-                </ul>
-            </li>
+            <h3 class="text-xl font-semibold text-primary mb-3">生成球員報告的步驟</h3>
+            <ol class="list-decimal pl-5 space-y-4">
+                <li><strong>打開應用程式</strong>
+                    <ul class="list-disc pl-5">
+                        <li>在您的網頁瀏覽器中訪問已托管的應用程式：<a href="https://melvinlhchow.github.io/LMPlayerReport/index.html" class="text-primary hover:underline">https://melvinlhchow.github.io/LMPlayerReport/index.html</a>。</li>
+                        <li>無需本地設置，工具已可線上使用。</li>
+                    </ul>
+                </li>
             <li><strong>選擇數據輸入方式</strong>
                 <ul>
                     <li>在「Player Data Input」部分，選擇以下之一：</li>
@@ -291,20 +289,22 @@
                     <li>使用瀏覽器列印對話框（Ctrl+P 或 Cmd+P），選擇「另存為 PDF」導出。</li>
                 </ul>
             </li>
-            <li><strong>下載會話數據（可選）</strong>
-                <ul>
-                    <li>在「Saved Reports」部分點擊「Download All Saved Data」按鈕，將所有報告導出為 Excel 文件。</li>
-                </ul>
-            </li>
-        </ol>
+            <li><strong>下載數據（可選）</strong>
+                    <ul class="list-disc pl-5">
+                        <li>在「Saved Reports」部分點擊「Download All Saved Data」按鈕，將所有報告導出為 Excel 文件。</li>
+                    </ul>
+                </li>
+            </ol>
 
-        <h2>注意事項</h2>
-        <ul>
-            <li><strong>重置表單：</strong>點擊「Reset Form」按鈕清除所有輸入。</li>
-            <li><strong>數據隱私：</strong>球員數據僅在當前會話中保存，瀏覽器刷新後不會保留，除非已導出。</li>
-            <li><strong>圖表渲染：</strong>報告中的雷達圖需稍等片刻渲染完成後再列印。</li>
-        </ul>
+            <h3 class="text-xl font-semibold text-primary mb-3">注意事項</h3>
+            <ul class="list-disc pl-5">
+                <li><strong>重置表單：</strong>點擊「Reset Form」按鈕清除所有輸入。</li>
+                <li><strong>數據隱私：</strong>球員數據僅在當前視窗中保存，瀏覽器刷新後不會保留，除非已導出。</li>
+                <li><strong>圖表渲染：</strong>報告中的雷達圖需稍等片刻渲染完成後再列印。</li>
+            </ul>
+        </div>
     </div>
+
 
     <script>
         function showLanguage(lang) {

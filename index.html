@@ -178,10 +178,13 @@
 <body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
     <!-- Main App Container -->
     <div id="app-container" class="container mx-auto px-4 py-6 max-w-5xl">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-primary mb-2">Lee Man FC Player Review Generator</h1>
-            <p class="text-gray-600 dark:text-gray-400">Create comprehensive player review reports for your academy players</p>
-        </header>
+		<header class="text-center mb-8">
+			<div class="flex justify-between items-center">
+				<h1 class="text-3xl font-bold text-primary mb-2">Lee Man Youth Academy Player Review Generator</h1>
+				<a href="https://melvinlhchow.github.io/LMPlayerReport/readme.html" target="_blank" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary transition-colors">View README</a>
+			</div>
+			<p class="text-gray-600 dark:text-gray-400">Create comprehensive player review reports for your academy players</p>
+		</header>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Input Section -->
@@ -634,16 +637,9 @@
     </div>
 
     <script>
-    // Default club logo as SVG data
-    const defaultClubLogoSVG = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="club-logo">
-            <circle cx="50" cy="50" r="45" fill="#FFD700" />
-            <circle cx="50" cy="50" r="38" fill="#FFFFFF" />
-            <path d="M30,35 L30,65 L35,65 L35,50 L50,50 L50,65 L55,65 L55,35 L50,35 L50,45 L35,45 L35,35 Z" fill="#022C5F"/>
-            <path d="M60,35 L60,65 L75,65 C77,65 78.5,64.5 79.5,63.5 C80.5,62.5 81,61 81,59 L81,41 C81,39 80.5,37.5 79.5,36.5 C78.5,35.5 77,35 75,35 Z M65,40 L75,40 L75,60 L65,60 Z" fill="#022C5F"/>
-        </svg>
-    `;
-
+	// Default club logo as a URL to the hosted PNG
+	const defaultClubLogoSVG = 'https://melvinlhchow.github.io/LMPlayerReport/LMLogo.png';
+	
 	// Global variables
 	let clubLogoData = null;
 	let currentReportHTML = "";
