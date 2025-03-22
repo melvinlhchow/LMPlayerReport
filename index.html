@@ -110,11 +110,13 @@
         
         /* Force image rendering */
         img {
-            display: block !important;
-            max-width: 100% !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-        }
+			display: block !important;
+			max-width: 100% !important;
+			width: auto !important;
+			height: auto !important;
+			page-break-inside: avoid !important;
+			break-inside: avoid !important;
+		}
     }
 
     /* Screen-specific adjustments for print mode */
@@ -1461,15 +1463,20 @@ printBtn.addEventListener('click', () => {
         const reviewDateEl = tempDiv.querySelector('p:last-of-type');
         const reviewDate = reviewDateEl ? reviewDateEl.textContent.replace('Review Date:', '').trim() : '';
         
-        const logoEl = tempDiv.querySelector('.col-span-1 svg, .col-span-1 img');
-        let logoHtml = '';
-        if (logoEl) {
-            const logoClone = logoEl.cloneNode(true);
-            if (logoClone.style) logoClone.style.maxWidth = '60px';
-            if (logoClone.style) logoClone.style.maxHeight = '60px';
-            logoHtml = logoClone.outerHTML;
-        }
-        
+       const logoEl = tempDiv.querySelector('.col-span-1 img'); // Only look for <img>, since we’ve standardized it
+		let logoHtml = '';
+		if (logoEl) {
+			const logoClone = logoEl.cloneNode(true);
+			logoClone.style.maxWidth = '60px';
+			logoClone.style.maxHeight = '60px';
+			logoClone.style.width = 'auto'; // Ensure it scales properly
+			logoClone.style.height = 'auto';
+			logoHtml = logoClone.outerHTML;
+		} else {
+			// Fallback if no logo element is found (shouldn’t happen after Issue 1 fix)
+			logoHtml = `<img src="${defaultClubLogoSVG}" alt="Club Logo" style="max-width: 60px; max-height: 60px; width: auto; height: auto;">`;
+		}
+				
         const portraitEl = tempDiv.querySelector('.w-32.h-32 img, .w-32.h-32 div');
         let portraitHtml = '';
         if (portraitEl) {
@@ -2143,7 +2150,9 @@ printBtn.addEventListener('click', () => {
 			const currentGradeStyle = gradeStyles[currentGrade] || 'bg-gray-200 text-gray-800';
 			const targetGradeStyle = gradeStyles[targetGrade] || 'bg-gray-200 text-gray-800';
 
-			let clubLogoHTML = clubLogoData ? `<img src="${clubLogoData}" alt="Club Logo" class="w-full h-auto">` : defaultClubLogoSVG;
+			let clubLogoHTML = clubLogoData 
+				? `<img src="${clubLogoData}" alt="Club Logo" class="w-full h-auto">` 
+				: `<img src="${defaultClubLogoSVG}" alt="Club Logo" class="w-full h-auto">`;
 			let portraitHTML = portraitImageData 
 				? `<img src="${portraitImageData}" alt="Player Portrait" class="w-full h-full object-cover border-2 border-gray-300">` 
 				: '<div class="w-full h-full bg-gray-200 flex items-center justify-center border-2 border-gray-300"><span class="text-gray-500">No Photo</span></div>';
