@@ -186,10 +186,13 @@
 				<a href="https://melvinlhchow.github.io/LMPlayerReport/readme.html" target="_blank" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary transition-colors">View README</a>
 			</div>
 			<p class="text-gray-600 dark:text-gray-400">Create comprehensive player review reports for your academy players</p>
+		
 		</header>
 
+	<div id="status-message" class="mt-6 py-2 px-4 rounded-md hidden"></div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Input Section -->
+           
+			<!-- Input Section -->
             <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-md">
                 <h2 class="text-xl font-semibold mb-4 text-primary">Player Data Input</h2>
                 
@@ -237,11 +240,11 @@
                 <div id="player-manual-input" class="mb-6 space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label for="manual-first-name" class="block text-sm font-medium mb-1">First Name</label>
+                            <label for="manual-first-name" class="block text-sm font-medium mb-1">First Name<span class="text-red-500">*</span></label>
                             <input type="text" id="manual-first-name" class="w-full rounded-md border-gray-300 shadow-sm p-2 bg-white dark:bg-gray-700 text-base" placeholder="Enter first name">
                         </div>
                         <div>
-                            <label for="manual-last-name" class="block text-sm font-medium mb-1">Last Name</label>
+                            <label for="manual-last-name" class="block text-sm font-medium mb-1">Last Name<span class="text-red-500">*</span></label>
                             <input type="text" id="manual-last-name" class="w-full rounded-md border-gray-300 shadow-sm p-2 bg-white dark:bg-gray-700 text-base" placeholder="Enter last name">
                         </div>
                     </div>
@@ -255,10 +258,10 @@
                     </div>
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium mb-1" for="portraitFile">Upload Player Portrait</label>
-                    <input type="file" id="portraitFile" accept="image/jpeg,image/png" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-secondary cursor-pointer" />
-                </div>
+				<div>
+					<label class="block text-sm font-medium mb-1" for="portraitFile">Upload Player Portrait <span class="text-red-500">*</span></label>
+					<input type="file" id="portraitFile" accept="image/jpeg,image/png" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-secondary cursor-pointer" />
+				</div>
                 
                 <!-- Club Logo Upload (Optional) -->
                 <div class="mt-4">
@@ -605,7 +608,7 @@
                     <h2 class="text-xl font-semibold mb-4 text-primary">Instructions</h2>
                     <div class="space-y-3 text-sm">
                         <p>1. Enter player information manually or upload from a file</p>
-                        <p>2. Upload the player's portrait photo (optional)</p>
+                        <p>2. Upload the player's portrait photo</p>
                         <p>3. Upload the club logo (optional)</p>
                         <p>4. Rate the player on all 12 performance metrics</p>
                         <p>5. Add detailed feedback and improvement areas</p>
@@ -628,9 +631,7 @@
 			</div>
 		</div>
         
-        <!-- Status Message -->
-        <div id="status-message" class="mt-6 py-2 px-4 rounded-md hidden"></div>
-    </div>
+        
 
     <!-- Print Container -->
     <div id="print-container" class="text-black">
@@ -1078,19 +1079,19 @@
     return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
 	}
 
-    portraitFileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) {
-            portraitImageData = null;
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            portraitImageData = e.target.result;
-            showStatus('Portrait uploaded successfully!', 'success');
-        };
-        reader.readAsDataURL(file);
-    });
+	portraitFileInput.addEventListener('change', (e) => {
+		const file = e.target.files[0];
+		if (file) {
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				portraitImageData = e.target.result;
+				showStatus('Player portrait uploaded successfully!', 'success');
+			};
+			reader.readAsDataURL(file);
+		} else {
+			portraitImageData = null;
+		}
+	});
 
     generateBtn.addEventListener('click', () => {
         if (manualPlayerDataRadio.checked) {
@@ -2027,6 +2028,12 @@
 		showStatus('Generating report...', 'info');
 
 		try {
+			// Check if a player portrait has been uploaded
+			if (!portraitImageData) {
+				showStatus('Please upload a player portrait before generating the report.', 'error');
+				return;
+			}
+
 			// Determine player data source
 			let playerInfo;
 			if (manualPlayerDataRadio.checked) {
@@ -2055,53 +2062,53 @@
 			}
 
 			// Collect height growth data
-				const startMonth = parseInt(document.getElementById('height-start-month').value);
-				const endMonth = parseInt(document.getElementById('height-end-month').value);
-				const baseYear = parseInt(document.getElementById('height-year').value);
-				const months = [
-					'january', 'february', 'march', 'april', 'may', 'june',
-					'july', 'august', 'september', 'october', 'november', 'december'
-				];
-				const monthShortNames = [
-					'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-					'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
-				];
-				const heightData = [];
-				let totalGrowth = 0;
-				let firstHeight = null;
-				let lastHeight = null;
+			const startMonth = parseInt(document.getElementById('height-start-month').value);
+			const endMonth = parseInt(document.getElementById('height-end-month').value);
+			const baseYear = parseInt(document.getElementById('height-year').value);
+			const months = [
+				'january', 'february', 'march', 'april', 'may', 'june',
+				'july', 'august', 'september', 'october', 'november', 'december'
+			];
+			const monthShortNames = [
+				'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+				'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+			];
+			const heightData = [];
+			let totalGrowth = 0;
+			let firstHeight = null;
+			let lastHeight = null;
 
-				let monthRange = [];
-				let yearTracker = baseYear;
-				if (endMonth >= startMonth) {
-					for (let i = startMonth; i <= endMonth; i++) {
-						monthRange.push({ index: i, year: baseYear });
-					}
-				} else {
-					for (let i = startMonth; i < 12; i++) {
-						monthRange.push({ index: i, year: baseYear });
-					}
-					yearTracker++;
-					for (let i = 0; i <= endMonth; i++) {
-						monthRange.push({ index: i, year: yearTracker });
-					}
+			let monthRange = [];
+			let yearTracker = baseYear;
+			if (endMonth >= startMonth) {
+				for (let i = startMonth; i <= endMonth; i++) {
+					monthRange.push({ index: i, year: baseYear });
 				}
-
-				monthRange.forEach(({ index, year }) => {
-					const month = months[index];
-					const displayMonth = `${monthShortNames[index]} ${year % 100}`;
-					const heightInput = document.getElementById(`height-${month}`);
-					const height = parseFloat(heightInput?.value) || 0;
-					if (height > 0) {
-						heightData.push({ month: displayMonth, height: height.toFixed(1) });
-						if (firstHeight === null) firstHeight = height;
-						lastHeight = height;
-					}
-				});
-
-				if (firstHeight !== null && lastHeight !== null && firstHeight !== lastHeight) {
-					totalGrowth = (lastHeight - firstHeight).toFixed(1);
+			} else {
+				for (let i = startMonth; i < 12; i++) {
+					monthRange.push({ index: i, year: baseYear });
 				}
+				yearTracker++;
+				for (let i = 0; i <= endMonth; i++) {
+					monthRange.push({ index: i, year: yearTracker });
+				}
+			}
+
+			monthRange.forEach(({ index, year }) => {
+				const month = months[index];
+				const displayMonth = `${monthShortNames[index]} ${year % 100}`;
+				const heightInput = document.getElementById(`height-${month}`);
+				const height = parseFloat(heightInput?.value) || 0;
+				if (height > 0) {
+					heightData.push({ month: displayMonth, height: height.toFixed(1) });
+					if (firstHeight === null) firstHeight = height;
+					lastHeight = height;
+				}
+			});
+
+			if (firstHeight !== null && lastHeight !== null && firstHeight !== lastHeight) {
+				totalGrowth = (lastHeight - firstHeight).toFixed(1);
+			}
 
 			currentHeightGrowthData = heightData;
 			currentTotalGrowth = totalGrowth;
@@ -2141,6 +2148,7 @@
 					</div>
 				</div>
 			`;
+
 
 			// Rest of the report generation (attendance, ratings, etc.) remains largely unchanged
 			const attendanceData = {
