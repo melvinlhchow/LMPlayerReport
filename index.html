@@ -16,7 +16,7 @@
     @media print {
         @page {
             size: A4 portrait;
-            margin: 1cm;
+            margin: 0.5cm;
         }
         html, body {
             height: auto !important;
@@ -26,6 +26,7 @@
             color-adjust: exact;
             margin: 0;
             background-color: white;
+			font-size: 9pt; /* Slightly smaller font to fit more content */
         }
         .no-print, .hide-for-print, .print-back-btn { 
             display: none !important; 
@@ -41,55 +42,60 @@
 		#report-container {
 			width: 100% !important;
 			max-width: 19cm !important; /* Match the preview’s max-width */
-			padding: 0.5cm !important;
+			max-height: 26.7cm !important; /* Fits A4 height per page */
+			padding: 0.2cm !important; /*reduced padding from 0.5*/
 			margin: 0 auto !important;
 			box-sizing: border-box !important;
 			height: auto !important;
-			overflow: visible !important;
+			overflow: hidden !important; /* prevent content overflow, changed from visible */
+			border: 1px solid red !important; /* Temporary for debugging */
 		}
 
         #app-container {
             display: none !important; 
         }
-        #print-container {
-            display: block !important;
-            position: static !important;
-            width: 100%;
-            height: auto !important;
-            overflow: visible !important;
-            background: white !important;
-            z-index: auto !important;
-            padding: 0 !important;
+		#print-container {
+			display: block !important;
+			position: static !important;
+			width: 100% !important;
+			max-width: 19cm !important;
+			height: auto !important;
+			max-height: 26.7cm !important; /* Constrain to A4 height */
+			overflow: hidden !important; /* Prevent overflow */
+			background: white !important;
+			z-index: auto !important;
+			padding: 0 !important;
+			margin: 0 auto !important;
+			box-sizing: border-box !important;
+			transform: scale(0.92); /* Slightly scale down content */
+			transform-origin: top center;
         }
-        .grid-2x2 {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        }
-        
-
-		/* Preserve the 2-column grid for specific sections */
-		.grid.grid-cols-1.md\:grid-cols-2 {
-			display: grid !important;
+		.grid-2x2, .grid.grid-cols-1.md\:grid-cols-2 {
 			grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-			gap: 1.5rem !important; /* Match the gap-6 (1.5rem) */
+			gap: 0.3rem !important; /* Reduced gap to save space */
 		}
-
-        /* Reset container sizes */
-        *, *::before, *::after {
-            box-sizing: border-box !important;
-        }
+		*, *::before, *::after {
+			box-sizing: border-box !important;
+			-webkit-box-sizing: border-box !important; /* Safari fix */
+		}
         
         /* Ensure headings don't get separated from their content */
-        h1, h2, h3, h4, h5, h6 {
-            page-break-after: avoid !important;
-            break-after: avoid !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-        }
+		h1, h2, h3, h4, h5, h6 {
+			page-break-after: avoid !important;
+			break-after: avoid !important;
+			page-break-inside: avoid !important;
+			break-inside: avoid !important;
+			font-size: 85% !important; /* Slightly reduce heading size */
+			margin: 0.3cm 0 !important; /* Reduced margins */
+		}
         
         /* General layout fixes */
         .print-section {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
+			max-height: 24cm !important; /* Ensure sections fit within page */
+			overflow: hidden !important;
+			margin-bottom: 0.2cm !important;
         }
         
         .print-section-break {
@@ -105,15 +111,17 @@
         
         /* Signature section */
         .signature-section {
-            page-break-before: always !important;
-            break-before: page !important;
-            margin-top: 3cm !important;
+            page-break-before: auto !important;
+            break-before: auto !important;
+            margin-top: 2cm !important;
+			max-height: 4cm !important; /* Limit signature section height */
+			font-size: 8pt !important;
         }
         .signature-line {
-            width: 150px;
-            height: 1px;
+            width: 120px;
+            height: 2px;
             background: black;
-            margin: 0 auto 8px;
+            margin: 0 auto 6px;
         }
         
         /* Force image rendering */
@@ -124,6 +132,18 @@
 			height: auto !important;
 			page-break-inside: avoid !important;
 			break-inside: avoid !important;
+		}
+		/* Safari-specific fixes */
+		@supports (-webkit-hyphens: none) {
+			#report-container, #print-container {
+				-webkit-transform: scale(0.95); /* Additional scaling for Safari */
+				-webkit-box-sizing: border-box;
+				overflow: hidden !important;
+			}
+			table, tr, td, th {
+				page-break-inside: avoid !important;
+				break-inside: avoid !important;
+			}
 		}
     }
 
@@ -1700,8 +1720,7 @@
 										<div class="flex justify-between"><span>Total Matches:</span><span class="font-medium">${attendanceData.match.totalMatches}</span></div>
 										<div class="flex justify-between"><span>Played:</span><span class="font-medium">${attendanceData.match.matchesPlayed}</span></div>
 										<div class="flex justify-between"><span>Total Minutes:</span><span class="font-medium">${attendanceData.match.totalMinutes}</span></div>
-										<div class="flex justify-between"><span>Minutes Played:</span><span class="font-medium">${attendanceData.match.minutesPlayed}</span></div>
-										<div class="flex justify-between text-primary font-semibold mt-2 pt-2 border-t"><span> </span><span>${matchMinutesPercentage}%</span></div>
+										<div class="flex justify-between text-primary font-semibold mt-2 pt-2 border-t"><span>Minutes Played:</span><span class="font-medium">${attendanceData.match.minutesPlayed} (${matchMinutesPercentage}%)</span></div>
 										<div class="w-full bg-gray-200 rounded-full h-2.5 mt-1"><div class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full progress-fill" style="--progress-width: ${matchMinutesPercentage}%; width: ${matchMinutesPercentage}%"></div></div>
 									</div>
 								</div>
@@ -2029,14 +2048,14 @@ function preparePrintView() {
                     .player-name { font-size: 24px; font-weight: 600; }
                     .player-meta { font-size: 14px; color: #666; }
                     .player-photo { width: 100px; height: 100px; margin-left: 20px; border-radius: 50%; } /* Added circular styling */
-                    .section { margin-bottom: 14px; }
+                    .section { margin-bottom: 10px; }
                     .section-title { font-size: 20px; font-weight: 600; color: #FFD700; margin-bottom: 10px; }
-					.box { flex: 1; border: 1px solid #ddd; padding: 15px; border-radius: 5px; box-sizing: border-box; min-height: 100px; }
+					.box { flex: 1; border: 1px solid #ddd; padding: 10px; border-radius: 5px; box-sizing: border-box; min-height: 100px; }
                     .box-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; }
-					.row { display: flex; gap: 12px; margin-bottom: 12px; align-items: stretch; } 
+					.row { display: flex; gap: 12px; margin-bottom: 10px; align-items: stretch; } 
 					.col { flex: 1; display: flex; flex-direction: column; }
                     .rating-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-                    .stars { font-size: 22px; }
+                    .stars { font-size: 18px; }
                     .gold-star { color: #FFD700; }
                     .gray-star { color: #ccc; }
                     .grade { font-size: 24px; font-weight: bold; text-align: center; padding: 10px; border-radius: 5px; }
@@ -2045,9 +2064,9 @@ function preparePrintView() {
                     .grade-c { background-color: #fff3cd; color: #856404; }
                     .grade-d { background-color: #ffeeba; color: #d9534f; }
                     .grade-e { background-color: #f8d7da; color: #721c24; }
-                    .signatures { display: flex; justify-content: space-around; margin-top: 60px; }
+                    .signatures { display: flex; justify-content: space-around; margin-top: 40px; }
                     .signature { text-align: center; }
-                    .signature-line { width: 150px; height: 1px; background: black; margin: 0 auto 8px; }
+                    .signature-line { width: 150px; height: 1px; background: black; margin-top: 40px; margin: 0 auto 8px; }
                     .signature-name { font-weight: bold; }
                     .signature-title { font-size: 12px; color: #666; }
                     .footer { text-align: center; font-size: 12px; color: #666; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px; }
@@ -2060,7 +2079,7 @@ function preparePrintView() {
                     .progress-red { background: #ef4444; }
                     .data-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
                     .data-row.highlight { font-weight: bold; color: #FFD700; }
-					.height-table { font-size: 14px; border-collapse: collapse; width: 100%; }
+					.height-table { font-size: 12px; border-collapse: collapse; width: 100%; }
 					.height-table th, .height-table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
 					.height-table tr:nth-child(even) { background-color: #f9f9f9; }
 					.height-table .total-growth { background-color: #fff3cd; font-weight: bold; color: #FFD700; }
@@ -2153,7 +2172,6 @@ function preparePrintView() {
                                     <div class="data-row"><span>Total Sessions:</span><span>${attendanceData.training.totalSessions}</span></div>
                                     <div class="data-row"><span>Sessions Attended:</span><span>${attendanceData.training.sessionsAttended}</span></div>
                                     <div class="data-row"><span>Total Minutes:</span><span>${attendanceData.training.totalMinutes}</span></div>
-                                    <div class="data-row"><span> </span><span> </span></div>
 									<div class="data-row highlight"><span>Attendance Rate:</span><span>${trainingAttendancePercentage}%</span></div>
                                     <div class="progress-bar"><div class="progress-fill ${trainingAttendancePercentage >= 80 ? 'progress-green' : trainingAttendancePercentage >= 60 ? 'progress-amber' : 'progress-red'}" style="width: ${trainingAttendancePercentage}%"></div></div>
                                 </div>
@@ -2164,8 +2182,7 @@ function preparePrintView() {
                                     <div class="data-row"><span>Total Matches:</span><span>${attendanceData.match.totalMatches}</span></div>
                                     <div class="data-row"><span>Matches Played:</span><span>${attendanceData.match.matchesPlayed}</span></div>
                                     <div class="data-row"><span>Total Minutes:</span><span>${attendanceData.match.totalMinutes}</span></div>
-                                    <div class="data-row"><span>Minutes Played:</span><span>${attendanceData.match.minutesPlayed}</span></div>
-                                    <div class="data-row highlight"><span></span><span>${matchMinutesPercentage}%</span></div>
+                                    <div class="data-row highlight"><span>Minutes Played:</span><span>${attendanceData.match.minutesPlayed}(${matchMinutesPercentage}%)</span></div>
                                     <div class="progress-bar"><div class="progress-fill ${matchMinutesPercentage >= 80 ? 'progress-green' : matchMinutesPercentage >= 60 ? 'progress-amber' : 'progress-red'}" style="width: ${matchMinutesPercentage}%"></div></div>
                                 </div>
                             </div>
@@ -2205,9 +2222,9 @@ function preparePrintView() {
                                         <div style="margin-bottom: 8px;">
                                             <div class="rating-row">
                                                 <span>${rating.skill}</span>
-                                                <span>${rating.rating}</span>
+                                                <span class="stars">${rating.stars}</span>
                                             </div>
-                                            <div class="stars">${rating.stars}</div>
+                                            
                                         </div>
                                     `).join('')}
                                 </div>
@@ -2217,11 +2234,10 @@ function preparePrintView() {
                                     <div class="box-title">Technical Ability</div>
                                     ${techRatings.map(rating => `
                                         <div style="margin-bottom: 8px;">
-                                            <div class="rating-row">
+											<div class="rating-row">
                                                 <span>${rating.skill}</span>
-                                                <span>${rating.rating}</span>
+                                                <span class="stars">${rating.stars}</span>
                                             </div>
-                                            <div class="stars">${rating.stars}</div>
                                         </div>
                                     `).join('')}
                                 </div>
@@ -2233,11 +2249,10 @@ function preparePrintView() {
                                     <div class="box-title">Physical Capacity</div>
                                     ${physRatings.map(rating => `
                                         <div style="margin-bottom: 8px;">
-                                            <div class="rating-row">
+											<div class="rating-row">
                                                 <span>${rating.skill}</span>
-                                                <span>${rating.rating}</span>
+                                                <span class="stars">${rating.stars}</span>
                                             </div>
-                                            <div class="stars">${rating.stars}</div>
                                         </div>
                                     `).join('')}
                                 </div>
@@ -2249,9 +2264,8 @@ function preparePrintView() {
                                         <div style="margin-bottom: 8px;">
                                             <div class="rating-row">
                                                 <span>${rating.skill}</span>
-                                                <span>${rating.rating}</span>
+                                                <span class="stars">${rating.stars}</span>
                                             </div>
-                                            <div class="stars">${rating.stars}</div>
                                         </div>
                                     `).join('')}
                                 </div>
@@ -2260,6 +2274,7 @@ function preparePrintView() {
                     </div>
                     <!-- Feedback Section -->
                     <div class="section">
+					<div class="section-title">Comments</div>
                         <div style="margin-bottom: 8px;">
 						<div class="box">
                             <div class="box-title">Targeted Feedback</div>
