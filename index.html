@@ -1890,7 +1890,7 @@
 					: '<div class="w-full h-full bg-gray-200 flex items-center justify-center"><span class="text-gray-500">No Photo</span></div>';
 
 				
-				let positionHTML = playerInfo.position ? `<p class="text-gray-600 dark:text-gray-300">Position: ${playerInfo.position}</p>` : '';
+				let positionHTML = playerInfo.position ? `<p class="text-base text-black dark:text-black">Position: ${playerInfo.position}</p>` : '';
 				// Store complete report data for printing
 				currentReportData = {
 					tacticalAvg: tacticalAvg,
@@ -1909,14 +1909,15 @@
 							</div>
 							<div class="grid grid-cols-4 gap-4">
 								<div class="col-span-3">
-									<h2 class="text-xl font-semibold">${playerInfo.firstName} ${playerInfo.lastName}</h2>							
-									<p class="text-gray-600 dark:text-gray-300">Date of Birth: ${playerInfo.sdob}</p>
+									<h2 class="text-xl font-bold text-black dark:text-black">${playerInfo.firstName} ${playerInfo.lastName}</h2>
+									<p class="text-base text-black dark:text-black">Date of Birth: ${playerInfo.sdob}</p>
 									${positionHTML}
-									${playerInfo.ageGroup ? `<p class="text-gray-600 dark:text-gray-300">Age Group: ${playerInfo.ageGroup}</p>` : ''}
-									<p class="text-gray-600 dark:text-gray-300">Review Date: ${new Date().toLocaleDateString()}</p>
+									${playerInfo.ageGroup ? `<p class="text-base text-black dark:text-black">Age Group: ${playerInfo.ageGroup}</p>` : ''}
+									<p class="text-base text-black dark:text-black">Review Date: ${new Date().toLocaleDateString()}</p>
 								</div>
+
 								<div class="col-span-1">
-									<div class="w-28 h-28 overflow-hidden rounded-full">${portraitHTML}</div>
+									<div class="w-32 h-32 overflow-hidden rounded-full">${portraitHTML}</div>
 								</div>
 							</div>
 						</div>
@@ -1954,7 +1955,7 @@
 								
 								<!-- Radar Chart - Fixed size -->
 								<div class="border rounded-lg p-3">
-									<h3 class="font-bold text-base mb-2 text-primary">Player Evaluation Radar</h3>
+									<h4 class="font-bold text-lg mb-3">Player Evaluation Radar</h4>
 									<div class="flex justify-center items-center" style="height: 220px;">
 										<div style="width: 280px; height: 200px;">
 											<canvas id="skills-radar"></canvas>
@@ -1964,7 +1965,7 @@
 								
 								<!-- Player Grades - Match height -->
 								<div class="border rounded-lg p-3" style="min-height: 220px;">
-									<h3 class="font-bold text-base mb-2 text-primary">Player Grades</h3>
+									<h4 class="font-bold text-lg mb-3">Player Grades</h4>
 									<div class="space-y-3">
 										<div class="flex items-center gap-3">
 											<span class="font-semibold text-sm">Current Grade:</span>
@@ -1973,7 +1974,7 @@
 										${strengths ? `
 											<div class="mt-3">
 												<h4 class="font-semibold text-sm mb-1">Strengths:</h4>
-												<p class="text-sm">${strengths}</p>
+												<p class="text-gray-700">${strengths}</p>
 											</div>
 										` : ''}
 									</div>
@@ -1989,7 +1990,7 @@
 								
 								<!-- Tactical (3) -->
 								<div class="border rounded-lg p-3">
-									<h3 class="font-bold text-base mb-2" style="color: #16a34a;">Tactical (${tacticalAvg})</h3>
+									<h4 class="font-bold text-lg mb-3">Tactical (${tacticalAvg})</h4>
 									<div class="space-y-1">
 										${createRatingBar('Attacking', ratings.tacticalAttacking)}
 										${createRatingBar('Defending', ratings.tacticalDefending)}
@@ -1999,7 +2000,7 @@
 								
 								<!-- Technical (3) -->
 								<div class="border rounded-lg p-3">
-									<h3 class="font-bold text-base mb-2" style="color: #2563eb;">Technical (${technicalAvg})</h3>
+									<h4 class="font-bold text-lg mb-3">Technical (${technicalAvg})</h4>
 									<div class="space-y-1">
 										${createRatingBar('Fundamental', ratings.technicalFundamental)}
 										${createRatingBar('Execution', ratings.technicalExecution)}
@@ -2009,7 +2010,7 @@
 								
 								<!-- Physical (4) -->
 								<div class="border rounded-lg p-3">
-									<h3 class="font-bold text-base mb-2" style="color: #ea580c;">Physical (${physicalAvg})</h3>
+									<h4 class="font-bold text-lg mb-3">Physical (${physicalAvg})</h4>
 									<div class="space-y-1">
 										${createRatingBar('Speed', ratings.physicalSpeed)}
 										${createRatingBar('Agility', ratings.physicalAgility)}
@@ -2020,7 +2021,7 @@
 								
 								<!-- Social (4) -->
 								<div class="border rounded-lg p-3">
-									<h3 class="font-bold text-base mb-2" style="color: #9333ea;">Social (${socialAvg})</h3>
+									<h4 class="font-bold text-lg mb-3">Social (${socialAvg})</h4>
 									<div class="space-y-1">
 										${createRatingBar('Communication', ratings.socialCommunication)}
 										${createRatingBar('Confidence', ratings.socialConfidence)}
@@ -2039,28 +2040,28 @@
 								
 								${coachFeedback ? `
 								<div class="border rounded-lg p-4">
-									<h4 class="font-semibold mb-2 text-green-700">Coach Feedback:</h4>
+									<h4 class="font-semibold mb-2 text-700">Coach Feedback:</h4>
 									<p class="text-gray-700">${coachFeedback}</p>
 								</div>
 								` : ''}
 								
 								${areasImprovement ? `
 								<div class="border rounded-lg p-4">
-									<h4 class="font-semibold mb-2 text-orange-700">Areas of Improvement:</h4>
+									<h4 class="font-semibold mb-2 text-700">Areas of Improvement:</h4>
 									<p class="text-gray-700">${areasImprovement}</p>
 								</div>
 								` : ''}
 								
 								${shortTermGoal ? `
 								<div class="border rounded-lg p-4">
-									<h4 class="font-semibold mb-2 text-blue-700">Short-term Goal:</h4>
+									<h4 class="font-semibold mb-2 text-700">Short-term Goal:</h4>
 									<p class="text-gray-700">${shortTermGoal}</p>
 								</div>
 								` : ''}
 								
 								${longTermGoal ? `
 								<div class="border rounded-lg p-4">
-									<h4 class="font-semibold mb-2 text-purple-700">Long-term Goal:</h4>
+									<h4 class="font-semibold mb-2 text-700">Long-term Goal:</h4>
 									<p class="text-gray-700">${longTermGoal}</p>
 								</div>
 								` : ''}
