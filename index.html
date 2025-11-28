@@ -658,18 +658,27 @@
 			
 			const ctx = canvasElement.getContext('2d');
 			
-			// Ensure canvas has explicit dimensions with high DPI support
-			const container = canvasElement.parentElement;
-			const dpr = window.devicePixelRatio || 1;
-			const cssWidth = container.clientWidth || 280;
-			const cssHeight = 200;
-			
-			canvasElement.width = cssWidth * dpr;
+			// Force higher internal resolution for a sharper radar (especially for print)
+			const container    = canvasElement.parentElement;
+			const baseCssWidth = container.clientWidth || 280;
+			const baseCssHeight = 200;
+
+			// Choose how sharp you want it: 2 = 2x resolution, 3 = 3x, etc.
+			const scaleFactor = 3;
+
+			const cssWidth  = baseCssWidth;
+			const cssHeight = baseCssHeight;
+			const dpr       = scaleFactor;
+
+			canvasElement.width  = cssWidth * dpr;
 			canvasElement.height = cssHeight * dpr;
-			ctx.scale(dpr, dpr);
-			
-			canvasElement.style.width = cssWidth + 'px';
+
+			// Reset transform then scale
+			ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+			canvasElement.style.width  = cssWidth + 'px';
 			canvasElement.style.height = cssHeight + 'px';
+
 			
 			// Clear canvas
 			ctx.fillStyle = '#ffffff';
@@ -704,9 +713,9 @@
 			
 			const categoryColors = {
 				tactical: '#FFD700',    // Gold
-				technical: '#FFE55C',   // Yellow
-				physical: '#FFA500',    // Orange
-				social: '#FFED4E'       // Pale yellow
+				technical: '#B4E600',   // Lime
+				physical: '#FF9800',    // Orange
+				social: '#7EC8FF'       // Blue
 			};
 			
 			// Get metric values
@@ -2318,8 +2327,8 @@
 
 
 				let clubLogoHTML = clubLogoData 
-					? `<img src="${clubLogoData}" alt="Club Logo" class="w-30 h-auto max-h-30">`
-					: `<img src="${defaultClubLogoSVG}" alt="Club Logo" class="w-28 h-auto max-h-28">`;
+					? `<img src="${clubLogoData}" alt="Club Logo" class="w-24 h-auto max-h-24">`
+					: `<img src="${defaultClubLogoSVG}" alt="Club Logo" class="w-24 h-auto max-h-24">`;
 				let portraitHTML = portraitImageData 
 					? `<img src="${portraitImageData}" alt="Player Portrait" class="w-full h-full object-cover">` 
 					: '<div class="w-full h-full bg-gray-200 flex items-center justify-center"><span class="text-gray-500">No Photo</span></div>';
@@ -2385,7 +2394,7 @@
 										<div class="flex justify-between"><span>Total Matches:</span><span class="font-medium">${attendanceData.match.totalMatches}</span></div>
 										<div class="flex justify-between"><span>Played:</span><span class="font-medium">${attendanceData.match.matchesPlayed}</span></div>
 										<div class="flex justify-between"><span>Total Minutes:</span><span class="font-medium">${attendanceData.match.totalMinutes}</span></div>
-										<div class="flex justify-between text-primary font-semibold mt-2 pt-2 border-t"><span>Minutes Played:</span><span class="font-medium">${attendanceData.match.minutesPlayed} (${matchMinutesPercentage}%)</span></div>
+										<div class="flex justify-between text-primary font-semibold mt-2 pt-2 border-t"><span>Minutes Played:</span><span>${attendanceData.match.minutesPlayed} (${matchMinutesPercentage}%)</span></div>
 										<div class="w-full bg-gray-200 rounded-full h-2.5 mt-1"><div class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full progress-fill" style="--progress-width: ${matchMinutesPercentage}%; width: ${matchMinutesPercentage}%"></div></div>
 									</div>
 								</div>
@@ -2396,16 +2405,18 @@
 							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 								
 								<!-- Radar Chart - Fixed size -->
+
+								
+								
 								<div class="border rounded-lg p-3">
 									<h4 class="font-bold text-lg mb-3">Player Evaluation Radar</h4>
-									<div class="flex justify-center items-center" style="height: 220px;">
+									<div class="radar-wrapper flex justify-center items-center" style="height: 220px;">
 										<div style="width: 280px; height: 200px;">
 											<canvas id="skills-radar"></canvas>
 										</div>
 									</div>
 								</div>
-								
-								
+																
 								
 								<!-- Player Grades - Match height -->
 								<div class="border rounded-lg p-3 flex flex-col justify-between" style="min-height: 220px;">
@@ -2436,51 +2447,50 @@
 
 						<div class="mb-8" style="page-break-before: always;padding-top: 3rem;">
 							<h3 class="font-bold text-xl mb-4 text-primary">Performance Metrics</h3>
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-								
+							<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 								<!-- Tactical (3) -->
-								<div class="border rounded-lg p-3">
+								<div class="border rounded-lg p-4 flex flex-col min-h-[170px]">
 									<h4 class="font-bold text-lg mb-3">Tactical (${tacticalAvg})</h4>
-									<div class="space-y-1">
+									<div class="space-y-2 flex-1 flex flex-col justify-between">
 										${createRatingBar('Attacking', ratings.tacticalAttacking)}
 										${createRatingBar('Defending', ratings.tacticalDefending)}
 										${createRatingBar('Transition Focus', ratings.tacticalTransition)}
 									</div>
 								</div>
-								
+
 								<!-- Technical (3) -->
-								<div class="border rounded-lg p-3">
+								<div class="border rounded-lg p-4 flex flex-col min-h-[170px]">
 									<h4 class="font-bold text-lg mb-3">Technical (${technicalAvg})</h4>
-									<div class="space-y-1">
+									<div class="space-y-2 flex-1 flex flex-col justify-between">
 										${createRatingBar('Fundamental', ratings.technicalFundamental)}
 										${createRatingBar('Execution', ratings.technicalExecution)}
 										${createRatingBar('Decision Making', ratings.technicalDecision)}
 									</div>
 								</div>
-								
+
 								<!-- Physical (4) -->
-								<div class="border rounded-lg p-3">
+								<div class="border rounded-lg p-4 flex flex-col min-h-[170px]">
 									<h4 class="font-bold text-lg mb-3">Physical (${physicalAvg})</h4>
-									<div class="space-y-1">
+									<div class="space-y-2 flex-1 flex flex-col justify-between">
 										${createRatingBar('Speed', ratings.physicalSpeed)}
 										${createRatingBar('Agility', ratings.physicalAgility)}
 										${createRatingBar('Coordination', ratings.physicalCoordination)}
 										${createRatingBar('Endurance', ratings.physicalEndurance)}
 									</div>
 								</div>
-								
+
 								<!-- Social (4) -->
-								<div class="border rounded-lg p-3">
+								<div class="border rounded-lg p-4 flex flex-col min-h-[170px]">
 									<h4 class="font-bold text-lg mb-3">Social (${socialAvg})</h4>
-									<div class="space-y-1">
+									<div class="space-y-2 flex-1 flex flex-col justify-between">
 										${createRatingBar('Communication', ratings.socialCommunication)}
 										${createRatingBar('Confidence', ratings.socialConfidence)}
 										${createRatingBar('Leadership', ratings.socialLeadership)}
 										${createRatingBar('Teamwork', ratings.socialTeamwork)}
 									</div>
 								</div>
-								
 							</div>
+
 						</div>
 
 
@@ -2568,9 +2578,9 @@
 			
 			return `
 				<div style="display: flex; justify-content: space-between; align-items: center; margin: 4px 0; gap: 8px;">
-					<span style="flex: 1 1 auto; font-size: 0.875rem; min-width: 0;">${label}</span>
-					<span style="flex: 0 0 auto; display: inline-flex; align-items: center; color: #FFD700; font-size: 1rem; letter-spacing: 1px; white-space: nowrap;">${filledStars}${emptyStars}</span>
-					<span style="flex: 0 0 auto; font-size: 0.875rem; font-weight: 600; min-width: 30px; text-align: right;">${value}/5</span>
+					<span style="flex: 1 1 auto; font-size: 16pt min-width: 0;">${label}</span>
+					<span style="flex: 0 0 auto; display: inline-flex; align-items: center; color: #FFD700; font-size: 16pt; letter-spacing: 1px; white-space: nowrap;">${filledStars}${emptyStars}</span>
+					<span style="flex: 0 0 auto; font-size: 1rem; font-weight: 600; min-width: 30px; text-align: right;">${value}/5</span>
 				</div>
 			`;
 		}
@@ -2621,7 +2631,29 @@
 
 				// ✅ Modify the HTML directly before printing
 				let printableHTML = currentReportHTML;
-				
+				// NEW: Recalculate attendance percentages for use in print window
+				const totalTrainingSessions = parseInt(document.getElementById('total-training-sessions')?.value || '0', 10);
+				const sessionsAttended     = parseInt(document.getElementById('training-sessions-attended')?.value || '0', 10);
+				const totalTrainingMinutes = parseInt(document.getElementById('total-training-minutes')?.value || '0', 10);
+
+				const totalMatches         = parseInt(document.getElementById('total-matches')?.value || '0', 10);
+				const matchesPlayed        = parseInt(document.getElementById('matches-played')?.value || '0', 10);
+				const totalMatchMinutes    = parseInt(document.getElementById('total-match-minutes')?.value || '0', 10);
+				const matchMinutesPlayed   = parseInt(document.getElementById('match-minutes-played')?.value || '0', 10);
+
+				// Same logic as generateReport
+				const trainingAttendancePercentage =
+					totalTrainingSessions > 0
+						? ((sessionsAttended / totalTrainingSessions) * 100).toFixed(1)
+						: '0.0';
+
+				const matchMinutesPercentage =
+					totalMatchMinutes > 0
+						? ((matchMinutesPlayed / totalMatchMinutes) * 100).toFixed(1)
+						: '0.0';
+
+								
+								
 				// Fix 1: Ensure portrait container has inline styles for print
 				printableHTML = printableHTML.replace(
 					/<div class="w-28 h-28 overflow-hidden rounded-full">/g,
@@ -2702,6 +2734,10 @@
 					'<span style="display: inline-flex; align-items: center; color: #FFD700;">'
 				);
 
+
+
+
+
 				// ✅ NEW: Convert rendered canvas to image BEFORE print window opens
 				const canvasElement = document.getElementById('skills-radar');
 				let chartImageDataURL = null;
@@ -2755,7 +2791,7 @@
 				
 				body {
 					padding: 0.5cm;
-					font-size: 14px !important;
+					font-size: 16px !important;
 					line-height: 1.3 !important;
 				}
 				
@@ -2770,9 +2806,9 @@
 				
 				/* Smaller headings */
 				h1 { font-size: 24px !important; margin-bottom: 0.3rem !important; }
-				h2 { font-size: 18px !important; margin-bottom: 0.3rem !important; }
-				h3 { font-size: 16px !important; margin-bottom: 0.3rem !important; }
-				h4 { font-size: 14px !important; margin-bottom: 0.2rem !important; }
+				h2 { font-size: 20px !important; margin-bottom: 0.3rem !important; }
+				h3 { font-size: 18px !important; margin-bottom: 0.3rem !important; }
+				h4 { font-size: 16px !important; margin-bottom: 0.2rem !important; }
 
 				
 				/* Compact performance metrics */
@@ -2825,7 +2861,19 @@
 				.to-secondary {
 					--tw-gradient-to: #E6C200 !important;
 				}
-				
+				/* Force radar chart to be centered in print */
+					.radar-wrapper {
+						display: flex !important;
+						justify-content: center !important;
+						align-items: center !important;
+					}
+
+					#skills-radar,
+					.radar-wrapper img {
+						display: block !important;
+						margin-left: auto !important;
+						margin-right: auto !important;
+					}
 				@media print {
 					body {
 						padding: 0.3cm;
@@ -2892,13 +2940,27 @@
 					.signature-section {
 						page-break-before: auto !important;
 						break-before: auto !important;
-						margin-top: 2cm !important; /* keep if you like the vertical gap */
+						margin-top: 3cm !important; /* keep if you like the vertical gap */
 						max-height: none !important; /* allow full height */
 						font-size: 9pt !important;   /* or remove this line entirely */
 					}
+					css
+					/* Force radar chart to be centered in print */
+					.radar-wrapper {
+						display: flex !important;
+						justify-content: center !important;
+						align-items: center !important;
+					}
+
+					#skills-radar,
+					.radar-wrapper img {
+						display: block !important;
+						margin-left: auto !important;
+						margin-right: auto !important;
+					}
 				}
 				.signature-line {
-					width: 120px;
+					width: 150px;
 					height: 2px;
 					background: black;
 					margin: 0 auto 6px;
@@ -2981,18 +3043,29 @@
 							return;
 						}
 						
-						// Ensure canvas has explicit dimensions with high DPI support
-						const container = canvasElement.parentElement;
-						const dpr = window.devicePixelRatio || 1;
-						const cssWidth = container.clientWidth || 280;
-						const cssHeight = 200;
-						
-						canvasElement.width = cssWidth * dpr;
+						// Ensure canvas has explicit dimensions with high DPI support (high‑res for print)
+						const container     = canvasElement.parentElement;
+						const baseCssWidth  = 280;  // fixed width for print
+						const baseCssHeight = 200;
+
+						// 2x internal resolution for a sharper printed chart
+						const scaleFactor = 3;
+						const cssWidth  = baseCssWidth;
+						const cssHeight = baseCssHeight;
+						const dpr       = scaleFactor;
+
+						canvasElement.width  = cssWidth * dpr;
 						canvasElement.height = cssHeight * dpr;
-						ctx.scale(dpr, dpr);
-						
-						canvasElement.style.width = cssWidth + 'px';
+
+						// Reset transform then scale
+						ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+						canvasElement.style.width  = cssWidth + 'px';
 						canvasElement.style.height = cssHeight + 'px';
+						canvasElement.style.display = 'block';
+						canvasElement.style.margin  = '0 auto';
+
+
 						
 						// Clear canvas
 						ctx.fillStyle = '#ffffff';
@@ -3128,6 +3201,30 @@
 
 				printWindow.document.write(printHTML);
 				printWindow.document.close();
+
+				// NEW: After the print content is loaded, fix the attendance bars
+				setTimeout(() => {
+					if (!printWindow || printWindow.closed) return;
+
+					const bars = printWindow.document.querySelectorAll('.progress-fill');
+
+					// bars[0] = Training Attendance, bars[1] = Match Minutes
+					if (bars[0]) {
+						bars[0].style.width = trainingAttendancePercentage + '%';
+						bars[0].style.background = 'linear-gradient(to right, #FFD700, #E6C200)';
+						bars[0].style.height = '10px';
+						bars[0].style.borderRadius = '9999px';
+					}
+
+					if (bars[1]) {
+						bars[1].style.width = matchMinutesPercentage + '%';
+						bars[1].style.background = 'linear-gradient(to right, #FFD700, #E6C200)';
+						bars[1].style.height = '10px';
+						bars[1].style.borderRadius = '9999px';
+					}
+
+					console.log('✓ Print progress bars updated:', trainingAttendancePercentage, matchMinutesPercentage);
+				}, 300);
 
 				showStatus('Print view opened successfully! The radar chart will appear in a moment.', 'success');
 
