@@ -109,19 +109,14 @@
         }
         
         /* Signature section */
-        .signature-section {
-            page-break-before: auto !important;
-            break-before: auto !important;
-            margin-top: 2cm !important;
-			max-height: 4cm !important; /* Limit signature section height */
-			font-size: 8pt !important;
-        }
-        .signature-line {
-            width: 120px;
-            height: 2px;
-            background: black;
-            margin: 0 auto 6px;
-        }
+		.signature-section {
+			page-break-before: auto !important;
+			break-before: auto !important;
+			margin-top: 2cm !important; /* keep if you like the vertical gap */
+			max-height: none !important; /* allow full height */
+			font-size: 9pt !important;   /* or remove this line entirely */
+		  }
+
         
         /* Force image rendering */
         img {
@@ -391,6 +386,13 @@
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 	}
     
+	.signature-line {
+		width: 120px;
+		height: 2px;
+		background: black;
+		margin: 0 auto 6px;
+	}
+	
 		/* Tag-based Selector Styles */
 		.tag-selector {
 			display: flex;
@@ -452,6 +454,7 @@
 			background-color: #10b981;
 			color: #ffffff;
 		}
+
 </style>
     
 
@@ -464,47 +467,414 @@
 				"RW", "LW", "CF", "ST"
 			],
 			strengths: [
-				"Sprinting speed", "Change of speed", "Agility", "Balance", "Power",
-				"Coordination", "Endurance", "Technique", "Decision making",
+				"Technique", "Decision making", "Off-the-ball movement", "Passing Range", "Finishing", "Crossing",
 				"1v1 ability", "Positioning", "Ball control", "Passing accuracy",
-				"Game intelligence", "Composure"
+				"Game intelligence", "Composure", "Sprinting speed", "Change of speed", "Agility", "Balance", "Power",
+				"Coordination", "Endurance"
 			],
 			feedback: [
 				"Hardworking", "Good hustle", "Team player", "Positive attitude",
-				"Good adaptability", "Quick learner", "Coachable",
+				"Good adaptability", "Quick learner", "Coachable","Technical consistency",
 				"Great tactical understanding", "Resilience", "Leadership potential",
 				"Effective communication", "Good physical fitness", "Great commitment",
 				"Punctuality", "Professional approach", "Growth mindset",
-				"Match mentality", "Technical consistency", "Competitive spirit",
+				"Match mentality",  "Competitive spirit",
 				"Role model behavior"
 			],
 			improvement: [
-				"Consistency", "Decision making", "Defensive skills", "Offensive skills",
-				"Playing under pressure", "Passing variety", "Physical conditioning",
-				"Communication", "Focus and concentration", "Agility", "Speed",
-				"Handling pressure", "Risk management", "Time management",
-				"Work rate", "Technical skills", "Game understanding",
-				"Nutrition and recovery", "Leadership", "First touch",
+				"Consistency", "Decision making", "Technical skills", "Defensive skills", "Offensive skills",
+				"Playing under pressure", "Passing variety", "First touch",
 				"Weak foot", "Aerial ability", "Transition speed",
-				"Off-ball movement", "Body shape"
+				"Off-ball movement", "Body shape", "Physical conditioning", "Nutrition and recovery",
+				 "Agility", "Speed","Communication", "Focus and concentration",
+				"Handling pressure", "Risk management", "Time management",
+				"Work rate",  "Game understanding",
+				 "Leadership"
 			],
 			shortgoal: [
-				"Master specific technique", "Improve physical metric",
+				"Improve attendance to 80%", "Improve grade", 
+				"Master playing position", "Master specific technique", "Improve physical metric",
 				"Enhance tactical awareness", "Achieve fitness target",
-				"HKRT representative selection", "First team promotion",
-				"Start 5 consecutive matches", "Score/assist 3 goals",
-				"Complete training cycle", "Master playing position",
-				"Improve grade", "Custom target"
+				"HKRT representative selection", "Promotion to Higher Age Group", 
+				"Train with First Team", "Train with Higher Age Group", "Start 2 consecutive matches",
+				"Start 5 consecutive matches", "Score/assist 3 goals", "3 Cleansheets"
+				
 			],
 			longgoal: [
-				"HKRT regular selection", "First team regular",
+				"HKRT regular selection",
 				"Professional contract", "Overseas football opportunity",
-				"University scholarship", "Elite academy placement",
+				"Academic scholarship", "Elite academy placement", 
 				"National team pathway", "Leadership role",
-				"Multi-position versatility", "Custom long-term target"
+				"Multi-position versatility"
 			]
 		};
+		// GK-specific
+		const gkStrengths = [
+		  "Shot-stopping", "1v1 situations", "Aerial dominance", "Handling and catching",
+		  "Distribution – throwing", "Distribution – kicking", "Sweeper-keeper ability",
+		  "Starting positions", "Command of penalty area", "Communication with back line"
+		];
+
+		const gkImprovement = [
+		  "Footwork speed", "Set-piece positioning", "Cross management",
+		  "Reactions from close range", "Dealing with rebounds", "Claim vs stay decisions",
+		  "Distribution accuracy under pressure", "Build-up play with centre backs",
+		  "Recovery runs after high starting position"
+		];
+
+		const gkShortGoals = [
+		  "Improve distribution accuracy under pressure", "Reduce goals conceded from set pieces",
+		  "Increase successful 1v1 stops", "Improve cross claiming consistency"
+		];
+
+		const gkLongGoals = [
+		  "Become first-choice goalkeeper", "Lead defensive organisation",
+		  "Develop as a sweeper-keeper", "Earn national team goalkeeper selection"
+		];
+
+		// Junior (U7–U12 / Junior Academy)
+		const juniorStrengths = [
+		  "Enthusiasm", "Basic coordination", "Listening skills", "Enjoyment of training",
+		  "Dribbling confidence", "Willingness to try new skills"
+		];
+
+		const juniorImprovement = [
+		  "Ball mastery", "Basic first touch", "Basic passing technique",
+		  "Concentration in sessions", "Understanding simple positions"
+		];
+
+		const juniorShortGoals = [
+		   "Learn 3 new ball mastery moves",
+		  "Use weak foot more in training", "Understand basic team shape", "Understand combination play with teammates"
+		];
+
+		// Senior (U18–U22) – optional
+		const seniorShortGoals = [
+		  "Earn regular starting position", "Maintain performance over full season",
+		  "Increase physical output in matches", "Lead unit pressing"
+		];
+
+		const seniorLongGoals = [
+		  "U22 regular", "Secure professional contract", "HKRT regular selection","First team promotion",
+		  "Prepare for senior football load", "Leadership role in squad", "University scholarship"
+		];
+
+		const categoryColors = {
+			tactical: ['#FFD700', '#FFC700', '#FFB700'],      // Bright gold to darker gold
+			technical: ['#FFE55C', '#FFD93D', '#FFC107'],      // Light yellow to amber
+			physical: ['#FFA500', '#FF9500', '#FF8500'],       // Orange-gold to deeper orange
+			social: ['#FFED4E', '#FFDB1C', '#FFC900']          // Pale yellow to deep gold
+		};
+
+		const metricToCategory = {
+			'Attacking': 'tactical',
+			'Defending': 'tactical',
+			'Transition Focus': 'tactical',
+			'Fundamental': 'technical',
+			'Execution': 'technical',
+			'Decision Making': 'technical',
+			'Speed': 'physical',
+			'Agility': 'physical',
+			'Coordination': 'physical',
+			'Endurance': 'physical',
+			'Communication': 'social',
+			'Confidence': 'social',
+			'Leadership': 'social',
+			'Teamwork': 'social'
+		};
+
+		// Helper: Map metric display name to input ID
+		function getInputIdForMetric(metricName) {
+			const mapping = {
+				'Attacking': 'tactical-attacking',
+				'Defending': 'tactical-defending',
+				'Transition Focus': 'tactical-transition',
+				'Fundamental': 'technical-fundamental',
+				'Execution': 'technical-execution',
+				'Decision Making': 'technical-decision',
+				'Speed': 'physical-speed',
+				'Agility': 'physical-agility',
+				'Coordination': 'physical-coordination',
+				'Endurance': 'physical-endurance',
+				'Communication': 'social-communication',
+				'Confidence': 'social-confidence',
+				'Leadership': 'social-leadership',
+				'Teamwork': 'social-teamwork'
+			};
+			return mapping[metricName] || '';
+		}
+
+		// Prepare radar chart data with all 14 metrics and Lee Man colors
+		function prepareRadarData() {
+			const radarLabels = [];
+			const radarData = [];
+			const radarBackgroundColors = [];
+			
+			const metricsOrder = [
+				'Attacking', 'Defending', 'Transition Focus',           // Tactical (3)
+				'Fundamental', 'Execution', 'Decision Making',          // Technical (3)
+				'Speed', 'Agility', 'Coordination', 'Endurance',        // Physical (4)
+				'Communication', 'Confidence', 'Leadership', 'Teamwork' // Social (4)
+			];
+			
+			metricsOrder.forEach((metric, index) => {
+				const inputId = getInputIdForMetric(metric);
+				const inputElement = document.getElementById(inputId);
+				const score = inputElement ? parseInt(inputElement.value) || 0 : 0;
+				
+				const category = metricToCategory[metric];
+				const colorIndex = Math.floor(index / 3.5) % 3;
+				const color = categoryColors[category][colorIndex];
+				
+				radarLabels.push(metric);
+				radarData.push(score);
+				radarBackgroundColors.push(color);
+			});
+			
+			return {
+				labels: radarLabels,
+				datasets: [{
+					label: 'Player Evaluation',
+					data: radarData,
+					backgroundColor: radarBackgroundColors,
+					borderColor: radarBackgroundColors,
+					borderWidth: 1,
+					fill: true,
+					tension: 0.3,
+					pointBackgroundColor: radarBackgroundColors,
+					pointBorderColor: '#fff',
+					pointBorderWidth: 2,
+					pointRadius: 5,
+					pointHoverRadius: 7
+				}]
+			};
+		}
 		
+		// Update radar chart with all 14 metrics
+		// Update custom sunburst/pie chart with all 14 metrics - responsive & print-safe
+		function updateRadarChart() {
+			const canvasElement = document.getElementById('skills-radar');
+			if (!canvasElement) return;
+			
+			const ctx = canvasElement.getContext('2d');
+			
+			// Ensure canvas has explicit dimensions with high DPI support
+			const container = canvasElement.parentElement;
+			const dpr = window.devicePixelRatio || 1;
+			const cssWidth = container.clientWidth || 280;
+			const cssHeight = 200;
+			
+			canvasElement.width = cssWidth * dpr;
+			canvasElement.height = cssHeight * dpr;
+			ctx.scale(dpr, dpr);
+			
+			canvasElement.style.width = cssWidth + 'px';
+			canvasElement.style.height = cssHeight + 'px';
+			
+			// Clear canvas
+			ctx.fillStyle = '#ffffff';
+			ctx.fillRect(0, 0, cssWidth, cssHeight);
+			
+			// Chart configuration
+			const centerX = cssWidth / 2;
+			const centerY = cssHeight / 2;
+			const maxRadius = 95;
+			const radiusScale = maxRadius / 5;
+			const sliceAngle = (Math.PI * 2) / 14;
+			
+			
+			// Metrics with shortened labels
+			const metricsOrder = [
+				{ name: 'Attacking', short: 'Att.', category: 'tactical' },
+				{ name: 'Defending', short: 'Def.', category: 'tactical' },
+				{ name: 'Transition Focus', short: 'Trans.', category: 'tactical' },
+				
+				{ name: 'Speed', short: 'Spd.', category: 'physical' },
+				{ name: 'Agility', short: 'Agi.', category: 'physical' },
+				{ name: 'Coordination', short: 'Coord.', category: 'physical' },
+				{ name: 'Endurance', short: 'End.', category: 'physical' },
+				{ name: 'Communication', short: 'Comm.', category: 'social' },
+				{ name: 'Confidence', short: 'Conf.', category: 'social' },
+				{ name: 'Leadership', short: 'Lead.', category: 'social' },
+				{ name: 'Teamwork', short: 'Team.', category: 'social' },
+				{ name: 'Fundamental', short: 'Fund.', category: 'technical' },
+				{ name: 'Execution', short: 'Exec.', category: 'technical' },
+				{ name: 'Decision Making', short: 'Dec.', category: 'technical' }
+			];
+			
+			const categoryColors = {
+				tactical: '#FFD700',    // Gold
+				technical: '#FFE55C',   // Yellow
+				physical: '#FFA500',    // Orange
+				social: '#FFED4E'       // Pale yellow
+			};
+			
+			// Get metric values
+			const values = metricsOrder.map((metric) => {
+				const inputId = getInputIdForMetric(metric.name);
+				const inputElement = document.getElementById(inputId);
+				const score = inputElement ? parseInt(inputElement.value) || 3 : 3;
+				return { ...metric, value: score };
+			});
+			
+			// Draw slices
+			values.forEach((metric, index) => {
+				const startAngle = index * sliceAngle - Math.PI / 2;
+				const endAngle = startAngle + sliceAngle;
+				const radius = metric.value * radiusScale;
+				const color = categoryColors[metric.category];
+				
+				// Draw slice (filled pie wedge from center)
+				ctx.beginPath();
+				ctx.moveTo(centerX, centerY);
+				ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+				ctx.lineTo(centerX, centerY);
+				ctx.closePath();
+				
+				ctx.fillStyle = color;
+				ctx.fill();
+				
+				// Draw border around slice
+				ctx.strokeStyle = '#333333';
+				ctx.lineWidth = 0.8;
+				ctx.stroke();
+			});
+			
+			// Draw 4 CATEGORY borders (wrapping around full circle)
+			// Borders at: end of Tactical (index 3), Technical (index 6), Physical (index 10), Social (index 14→0)
+			const categoryEndIndices = [2, 6, 10, 13]; // Last index of each category (0-indexed)
+			
+			// Use fixed max radius for all borders (ensures uniform length)
+			const fixedBorderRadius = maxRadius + 5;  // Always extends slightly beyond max
+
+			categoryEndIndices.forEach((endIndex) => {
+				// Border after this category (between categories)
+				const borderIndex = (endIndex + 1) % 14;
+				const angle = (borderIndex * sliceAngle) - Math.PI / 2;
+				
+				const x1 = centerX + Math.cos(angle) * 2;
+				const y1 = centerY + Math.sin(angle) * 2;
+				const x2 = centerX + Math.cos(angle) * fixedBorderRadius;
+				const y2 = centerY + Math.sin(angle) * fixedBorderRadius;
+				
+				ctx.strokeStyle = '#333333';
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(x1, y1);
+				ctx.lineTo(x2, y2);
+				ctx.stroke();
+			});
+
+			
+			
+			
+			
+			
+			// Draw metric labels VERY CLOSE to pie
+			ctx.font = 'bold 10px Arial';
+			ctx.fillStyle = '#333333';
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			
+			values.forEach((metric, index) => {
+				const angle = (index * sliceAngle) + (sliceAngle / 2) - Math.PI / 2;
+				const labelRadius = 90; // MUCH closer to pie edge
+				const x = centerX + Math.cos(angle) * labelRadius;
+				const y = centerY + Math.sin(angle) * labelRadius;
+				
+				ctx.save();
+				ctx.translate(x, y);
+				ctx.fillText(metric.short, 0, 0);
+				ctx.restore();
+			});
+			
+			// Draw value numbers in slice centers
+			ctx.font = 'bold 10px Arial';
+			ctx.fillStyle = '#333333';
+			
+			values.forEach((metric, index) => {
+				const angle = (index * sliceAngle) + (sliceAngle / 2) - Math.PI / 2;
+				const radius = 66;
+				const x = centerX + Math.cos(angle) * radius;
+				const y = centerY + Math.sin(angle) * radius;
+				
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText(metric.value, x, y);
+			});
+		}
+
+
+
+
+		function getTagPools(position, ageGroup) {
+		  const pos = (position || '').toUpperCase();
+		  const ag = (ageGroup || '').toUpperCase();
+
+		  const isGK = pos.includes('GK') || pos.includes('GOALKEEPER');
+		  const isJunior = ['U7','U8','U9','U10','U11','U12','JUNIOR ACADEMY'].includes(ag);
+		  const isSenior = ['U18','U20','U22'].includes(ag);
+
+		  let s = strengths;
+		  let f = feedback;
+		  let imp = improvement;
+		  let sg = shortgoal;
+		  let lg = longgoal;
+
+		  if (isGK) {
+			if (gkStrengths) s = gkStrengths;
+			if (gkImprovement) imp = gkImprovement;
+			if (gkShortGoals) sg = gkShortGoals;
+			if (gkLongGoals) lg = gkLongGoals;
+		  } else if (isJunior) {
+			if (juniorStrengths) s = juniorStrengths;
+			if (juniorImprovement) imp = juniorImprovement;
+			if (juniorShortGoals) sg = juniorShortGoals;
+		  } else if (isSenior) {
+			if (seniorShortGoals) sg = seniorShortGoals;
+			if (seniorLongGoals) lg = seniorLongGoals;
+		  }
+
+		  return { strengths: s, feedback: f, improvement: imp, shortgoal: sg, longgoal: lg };
+		}
+
+		function getExtraTagsForContext(position, ageGroup) {
+		  const pos = (position || '').toUpperCase();
+		  const ag = (ageGroup || '').toUpperCase();
+
+		  const isGK = pos.includes('GK') || pos.includes('GOALKEEPER');
+		  const isJunior = ['U7','U8','U9','U10','U11','U12','JUNIOR ACADEMY'].includes(ag);
+		  const isSenior = ['U18','U20','U22'].includes(ag);
+
+		  const extra = {
+			strengths: [],
+			feedback: [],
+			improvement: [],
+			shortgoal: [],
+			longgoal: []
+		  };
+
+		  if (isGK) {
+			if (gkStrengths) extra.strengths.push(...gkStrengths);
+			if (gkImprovement) extra.improvement.push(...gkImprovement);
+			if (gkShortGoals) extra.shortgoal.push(...gkShortGoals);
+			if (gkLongGoals) extra.longgoal.push(...gkLongGoals);
+		  }
+
+		  if (isJunior) {
+			if (juniorStrengths) extra.strengths.push(...juniorStrengths);
+			if (juniorImprovement) extra.improvement.push(...juniorImprovement);
+			if (juniorShortGoals) extra.shortgoal.push(...juniorShortGoals);
+		  }
+
+		  if (isSenior) {
+			if (seniorShortGoals) extra.shortgoal.push(...seniorShortGoals);
+			if (seniorLongGoals) extra.longgoal.push(...seniorLongGoals);
+		  }
+
+		  return extra;
+		}
+
 		// Initialize tag selectors
 		function initializeTagSelectors() {
 			Object.keys(PRESET_VALUES).forEach(type => {
@@ -532,6 +902,28 @@
 
 		}
 		
+		function refreshTagsForType(type, extraValues = []) {
+		  const container = document.getElementById(`${type}-tags`);
+		  if (!container) return;
+
+		  // Clear existing tags
+		  container.innerHTML = '';
+
+		  // Base values from PRESET_VALUES
+		  const baseValues = PRESET_VALUES[type] || [];
+
+		  // Merge base + extra (avoid duplicates)
+		  const allValues = [...baseValues, ...extraValues].filter((v, i, arr) => arr.indexOf(v) === i);
+
+		  allValues.forEach(value => {
+			const tag = document.createElement('span');
+			tag.className = 'preset-tag';
+			tag.textContent = value;
+			tag.dataset.value = value;
+			tag.onclick = () => toggleTag(tag, type);
+			container.appendChild(tag);
+		  });
+		}
 
 		
 		
@@ -540,7 +932,14 @@
 			tag.classList.toggle('selected');
 			updateCharCounter(type);
 			updateProgress();
+
+			if (type === 'position') {
+				updateContextTags();
+			}
 		}
+		
+		
+
 		
 		// Update character counter
 		function updateCharCounter(type) {
@@ -553,6 +952,8 @@
 			}
 		}
 		
+
+
 		// Get combined text from tags and manual input
 		function getCombinedText(type) {
 			const container = document.getElementById(`${type}-tags`);
@@ -569,6 +970,31 @@
 			const combined = [...selectedTags, manualText].filter(Boolean).join(', ');
 			return combined;
 		}
+
+		// === Context-sensitive tags (age group + position) ===
+		const positionInput = document.getElementById('manual-position');
+		const ageGroupSelect = document.getElementById('manual-age-group');
+
+		function updateContextTags() {
+			const position = getCombinedText('position') || (positionInput?.value || '');
+			const ageGroup = ageGroupSelect?.value || '';
+
+			const extra = getExtraTagsForContext(position, ageGroup);
+
+			refreshTagsForType('strengths', extra.strengths);
+			refreshTagsForType('feedback', extra.feedback);
+			refreshTagsForType('improvement', extra.improvement);
+			refreshTagsForType('shortgoal', extra.shortgoal);
+			refreshTagsForType('longgoal', extra.longgoal);
+		}
+
+
+
+
+
+
+
+
 
         tailwind.config = {
             theme: {
@@ -1339,6 +1765,7 @@
 						slider.addEventListener('input', (e) => {
 							valueDisplay.textContent = e.target.value;
 							updateMetricAverages(); // ← ADD THIS
+							updateRadarChart();  // ← ADD THIS LINE
 							updateProgress(); // ← ADD THIS
 						});
 					}
@@ -1778,10 +2205,18 @@
 					<div class="mb-8">
 						<h3 class="font-bold text-xl mb-4 text-primary">Physical Data</h3>
 						<div class="border rounded-lg p-4">
+
 							<div class="grid grid-cols-2 gap-4 mb-4">
-								<div><strong>Height:</strong> ${physicalData.height} cm</div>
-								<div><strong>Weight:</strong> ${physicalData.weight} kg</div>
+								<div class="text-sm"><h4>
+									<span class="font-semibold mb-2">Height:</span>
+									<span class="font-semibold ml-1">${physicalData.height} cm</span>
+								</h4></div>
+								<div class="text-sm"><h4>
+									<span class="font-semibold mb-2">Weight:</span>
+									<span class="font-semibold ml-1">${physicalData.weight} kg</span>
+								</h4></div>
 							</div>
+
 							<h4 class="font-semibold mb-2">Physical Test Results</h4>
 							<table class="w-full text-center border-collapse">
 								<thead>
@@ -1883,8 +2318,8 @@
 
 
 				let clubLogoHTML = clubLogoData 
-					? `<img src="${clubLogoData}" alt="Club Logo" class="w-full h-auto">` 
-					: `<img src="${defaultClubLogoSVG}" alt="Club Logo" class="w-full h-auto">`;
+					? `<img src="${clubLogoData}" alt="Club Logo" class="w-30 h-auto max-h-30">`
+					: `<img src="${defaultClubLogoSVG}" alt="Club Logo" class="w-28 h-auto max-h-28">`;
 				let portraitHTML = portraitImageData 
 					? `<img src="${portraitImageData}" alt="Player Portrait" class="w-full h-full object-cover">` 
 					: '<div class="w-full h-full bg-gray-200 flex items-center justify-center"><span class="text-gray-500">No Photo</span></div>';
@@ -1901,13 +2336,20 @@
 				const reportHTML = `
 					<div class="bg-white text-black p-8 print:p-[0.5cm] w-full max-w-[19cm] mx-auto" id="report-container" style="height: auto; overflow: visible; page-break-inside: auto; break-inside: auto;">
 						<div class="mb-6 border-b-2 border-primary pb-4">
-							<div class="grid grid-cols-6 gap-4 mb-4">
-								<div class="col-span-1">${clubLogoHTML.replace('style="max-width: 100px; height: auto;"', 'style="max-width: 60px; max-height: 60px; height: auto;"')}</div>
-								<div class="col-span-5">
-									<h1 class="text-3xl font-bold text-primary">Player Performance Review</h1>
+							<div class="mb-4 w-full">
+							  <div class="flex flex-col items-center justify-center mb-2">
+								<div class="mb-2">
+								  ${clubLogoHTML.replace(
+									'style="max-width: 200px; height: auto;"',
+									'style="max-width: 100px; max-height: 100px; height: auto;"'
+								  )}
 								</div>
+								<h1 class="text-3xl font-bold text-primary text-center">
+								  Academy Player Development Report
+								</h1>
+							  </div>
 							</div>
-							<div class="grid grid-cols-4 gap-4">
+						<div class="grid grid-cols-4 gap-4">
 								<div class="col-span-3">
 									<h2 class="text-xl font-bold text-black dark:text-black">${playerInfo.firstName} ${playerInfo.lastName}</h2>
 									<p class="text-base text-black dark:text-black">Date of Birth: ${playerInfo.sdob}</p>
@@ -1963,21 +2405,29 @@
 									</div>
 								</div>
 								
+								
+								
 								<!-- Player Grades - Match height -->
-								<div class="border rounded-lg p-3" style="min-height: 220px;">
+								<div class="border rounded-lg p-3 flex flex-col justify-between" style="min-height: 220px;">
+								  <div>
 									<h4 class="font-bold text-lg mb-3">Player Grades</h4>
-									<div class="space-y-3">
-										<div class="flex items-center gap-3">
-											<span class="font-semibold text-sm">Current Grade:</span>
-											<span class="px-3 py-1 rounded-full text-sm ${gradeStyles[currentGrade] || 'bg-gray-200 text-gray-800'}">${currentGrade}</span>
-										</div>
-										${strengths ? `
-											<div class="mt-3">
-												<h4 class="font-semibold text-sm mb-1">Strengths:</h4>
-												<p class="text-gray-700">${strengths}</p>
-											</div>
-										` : ''}
+
+									<div class="mb-4">
+									  <span class="block font-semibold text-sm mb-1">Current Grade:</span>
+									  <div class="w-full">
+										<span class="block w-full text-center text-2xl py-2 rounded-full ${gradeStyles[currentGrade] || 'bg-gray-200 text-gray-800'}">
+										  ${currentGrade}
+										</span>
+									  </div>
 									</div>
+
+									${strengths ? `
+									  <div>
+										<h4 class="font-semibold text-sm mb-1">Strengths:</h4>
+										<p class="text-gray-700">${strengths}</p>
+									  </div>
+									` : ''}
+								  </div>
 								</div>
 								
 							</div>
@@ -2076,7 +2526,7 @@
 							</div>
 						</div>
 						<div class="text-center text-sm text-gray-500 border-t-2 border-gray-200 pt-2 mt-4">
-							<p>Lee Man Football Club - Player Development Report</p>
+							<p>Lee Man Football Club - Academy Player Development Report</p>
 							<p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
 						</div>
 					</div>
@@ -2087,64 +2537,7 @@
 				reportPreview.innerHTML = reportHTML;
 				// Initialize radar chart after report is rendered
 				setTimeout(() => {
-					const radarCanvas = document.getElementById('skills-radar');
-					if (radarCanvas && typeof Chart !== 'undefined') {
-						const ctx = radarCanvas.getContext('2d');
-						
-						new Chart(ctx, {
-							type: 'radar',
-							data: {
-								labels: ['Tactical', 'Technical', 'Physical', 'Social'],
-								datasets: [{
-									label: 'Player Performance',
-									data: [
-										parseFloat(tacticalAvg),
-										parseFloat(technicalAvg),
-										parseFloat(physicalAvg),
-										parseFloat(socialAvg)
-									],
-									backgroundColor: 'rgba(33, 128, 141, 0.2)',
-									borderColor: 'rgba(33, 128, 141, 1)',
-									borderWidth: 2,
-									pointBackgroundColor: 'rgba(33, 128, 141, 1)',
-									pointBorderColor: '#fff',
-									pointHoverBackgroundColor: '#fff',
-									pointHoverBorderColor: 'rgba(33, 128, 141, 1)'
-								}]
-							},
-							options: {
-								responsive: true,
-								maintainAspectRatio: true,  // Changed to false for custom sizing
-								aspectRatio: 1.4,  // ← ADD: 280/200 = 1.4 ratio for your container
-								scales: {
-									r: {
-										min: 0,
-										max: 5,
-										ticks: {
-											stepSize: 1,
-											font: { size: 10 },
-											backdropPadding: 4
-										},
-										pointLabels: {
-											font: { size: 11, weight: 'bold' },
-											padding: 15  // More padding around labels
-										}
-									}
-								},
-								plugins: {
-									legend: { display: false }
-								},
-								layout: {
-									padding: {
-										left: 5,
-										right: 5,
-										top: 5,
-										bottom: 5
-									}
-								}
-							}
-						});
-					}
+					updateRadarChart();
 				}, 100);
 				pdfControls.classList.remove('hidden');
 
@@ -2159,85 +2552,7 @@
 				savedReports.push(reportEntry);
 				updateSavedReportsList();
 
-				const canvas = document.getElementById('skills-radar');
-				if (canvas && canvas.getContext) {
-					const ctx = canvas.getContext('2d');
-					if (window.skillsChart) window.skillsChart.destroy();
 
-					window.skillsChart = new Chart(ctx, {
-						type: 'radar',
-						data: {
-							labels: ['Tactical', 'Technical', 'Physical', 'Social'],  // ← FIXED: removed nested array
-							datasets: [{
-								label: 'Player Performance',  // ← FIXED: updated label
-								data: [
-									parseFloat(tacticalAvg),
-									parseFloat(technicalAvg),
-									parseFloat(physicalAvg),
-									parseFloat(socialAvg)
-								],
-								backgroundColor: 'rgba(33, 128, 141, 0.2)',  // ← FIXED: teal color
-								borderColor: 'rgba(33, 128, 141, 1)',        // ← FIXED: teal color
-								borderWidth: 2,
-								pointBackgroundColor: 'rgba(33, 128, 141, 1)',  // ← FIXED: teal color
-								pointBorderColor: '#fff',
-								pointHoverBackgroundColor: '#fff',
-								pointHoverBorderColor: 'rgba(33, 128, 141, 1)'  // ← FIXED: teal color
-							}]
-						},
-						options: {
-							animation: {
-								onComplete: () => {
-									const chartImage = canvas.toDataURL('image/png');
-									currentReportHTML = currentReportHTML.replace(
-										'<canvas id="skills-radar"></canvas>',
-										`<img src="${chartImage}" alt="Player Evaluation Radar" style="width: 280px; height: 200px;">`
-									);
-									reportPreview.innerHTML = currentReportHTML;
-									reportEntry.html = currentReportHTML;
-								}
-							},
-							responsive: true,
-							maintainAspectRatio: true,  // ← FIX: Allow natural aspect ratio
-							aspectRatio: 1.4,  // ← ADD: 280/200 = 1.4 ratio for your container
-
-							layout: {
-								padding: {
-									left: 5,
-									right: 5,
-									top: 5,
-									bottom: 5
-								}
-							},
-							plugins: {
-								legend: { display: false }
-							},
-							scales: {
-								r: {
-									min: 0,
-									max: 5,
-									ticks: { 
-										stepSize: 1,
-										font: { size: 10 },
-										backdropPadding: 4
-									},
-									grid: { circular: true },
-									pointLabels: {
-										font: {
-											size: 11,
-											weight: 'bold',
-											family: 'Poppins'
-										},
-										padding: 15
-									}
-								}
-							}
-						}
-					});
-				} else {
-					console.error('Canvas element not found or context unavailable');
-					showStatus('Skills chart could not be rendered, but report was saved.', 'warning');
-				}
 
 
 				showStatus('Report generated and saved successfully!', 'success');
@@ -2322,7 +2637,7 @@
 				// Fix 3: Ensure club logo has proper size
 				printableHTML = printableHTML.replace(
 					/alt="Club Logo" class="w-full h-auto"/g,
-					'alt="Club Logo" style="max-width: 50px; max-height: 50px; width: auto; height: auto;"'
+					'alt="Club Logo" style="max-width: 80px; max-height: 80px; width: auto; height: auto;"'
 				);
 
 				// Fix 4: Force all grids to display as 2-column with inline styles
@@ -2387,13 +2702,27 @@
 					'<span style="display: inline-flex; align-items: center; color: #FFD700;">'
 				);
 
+				// ✅ NEW: Convert rendered canvas to image BEFORE print window opens
+				const canvasElement = document.getElementById('skills-radar');
+				let chartImageDataURL = null;
+
+				if (canvasElement) {
+					try {
+						chartImageDataURL = canvasElement.toDataURL('image/png');
+						console.log('✓ Chart converted to image successfully');
+					} catch (err) {
+						console.warn('Could not convert canvas to image:', err);
+					}
+				}
+
 				// Build complete print HTML
 				const printHTML = `<!DOCTYPE html>
+
 		<html lang="en">
 		<head>
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<title>Player Performance Review - Print</title>
+			<title>Player Development Report - Print</title>
 			
 			<!-- ✅ FIX 1: Load Google Fonts directly -->
 			<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -2426,7 +2755,7 @@
 				
 				body {
 					padding: 0.5cm;
-					font-size: 11px !important;
+					font-size: 14px !important;
 					line-height: 1.3 !important;
 				}
 				
@@ -2440,10 +2769,11 @@
 				.gap-4 { gap: 0.4rem !important; }
 				
 				/* Smaller headings */
-				h1 { font-size: 20px !important; margin-bottom: 0.3rem !important; }
+				h1 { font-size: 24px !important; margin-bottom: 0.3rem !important; }
 				h2 { font-size: 18px !important; margin-bottom: 0.3rem !important; }
 				h3 { font-size: 16px !important; margin-bottom: 0.3rem !important; }
-				h4 { font-size: 13px !important; margin-bottom: 0.2rem !important; }
+				h4 { font-size: 14px !important; margin-bottom: 0.2rem !important; }
+
 				
 				/* Compact performance metrics */
 				.border.rounded-lg { padding: 0.4rem !important; }
@@ -2559,7 +2889,22 @@
 					.md\:grid-cols-2 {
 						grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 					}
+					.signature-section {
+						page-break-before: auto !important;
+						break-before: auto !important;
+						margin-top: 2cm !important; /* keep if you like the vertical gap */
+						max-height: none !important; /* allow full height */
+						font-size: 9pt !important;   /* or remove this line entirely */
+					}
 				}
+				.signature-line {
+					width: 120px;
+					height: 2px;
+					background: black;
+					margin: 0 auto 6px;
+				}
+				
+				  
 			</style>
 		</head>
 		<body>
@@ -2576,71 +2921,208 @@
 			</div>
 			
 			<script>
-				// ✅ FIX 5: Increase radar chart padding to prevent label cropping
-				window.addEventListener('load', function() {
-					setTimeout(() => {
-						const radarCanvas = document.getElementById('skills-radar');
-						if (radarCanvas && typeof Chart !== 'undefined') {
-							const ctx = radarCanvas.getContext('2d');
-							const data = ${JSON.stringify(currentReportData)};
+				// ✅ If we have a chart image from parent window, use it instead of redrawing
+				const chartImageDataURL = '${chartImageDataURL}';
+				
+				if (chartImageDataURL && chartImageDataURL !== 'null') {
+					// Replace canvas with image on page load
+					window.addEventListener('load', function() {
+						const canvasElement = document.getElementById('skills-radar');
+						if (canvasElement) {
+							const img = document.createElement('img');
+							img.src = chartImageDataURL;
+							img.alt = 'Player Evaluation Chart';
+							img.style.maxWidth = '100%';
+							img.style.height = 'auto';
+							img.style.display = 'block';
 							
-							new Chart(ctx, {
-								type: 'radar',
-								data: {
-									labels: ['Tactical', 'Technical', 'Physical', 'Social'],
-									datasets: [{
-										label: 'Player Performance',
-										data: [
-											parseFloat(data.tacticalAvg),
-											parseFloat(data.technicalAvg),
-											parseFloat(data.physicalAvg),
-											parseFloat(data.socialAvg)
-										],
-										backgroundColor: 'rgba(255, 215, 0, 0.2)',
-										borderColor: '#FFD700',
-										borderWidth: 2,
-										pointBackgroundColor: '#FFD700',
-										pointBorderColor: '#fff',
-										pointHoverBackgroundColor: '#fff',
-										pointHoverBorderColor: '#FFD700'
-									}]
-								},
-								options: {
-									responsive: true,
-									maintainAspectRatio: true,  // ← FIX: Allow natural aspect ratio
-									aspectRatio: 1.4,  // ← ADD: 280/200 = 1.4 ratio for your container
-									scales: {
-										r: {
-											min: 0,
-											max: 5,
-											ticks: { 
-												stepSize: 1, 
-												font: { size: 9 }, 
-												backdropPadding: 3 
-											},
-											pointLabels: { 
-												font: { size: 10, weight: 'bold' }, 
-												padding: 20  /* ✅ INCREASED from 12 to 20 */
-											}
-										}
-									},
-									plugins: { 
-										legend: { display: false } 
-									},
-									layout: { 
-										padding: {
-											left: 10,     /* ✅ INCREASED from 5 to 10 */
-											right: 10,    /* ✅ INCREASED from 5 to 10 */
-											top: 10,      /* ✅ INCREASED from 5 to 10 */
-											bottom: 10    /* ✅ INCREASED from 5 to 10 */
-										}
-									}
-								}
-							});
+							if (canvasElement.parentElement) {
+								canvasElement.parentElement.replaceChild(img, canvasElement);
+								console.log('✓ Chart canvas replaced with image');
+							}
 						}
-					}, 500);
-				});
+					});
+				} else {
+					// Fallback: If no image available, try to render (your original code)
+					console.warn('No chart image available, attempting to render');
+					
+					// Helper function - copy from your main code
+					function getInputIdForMetric(metricName) {
+						const mapping = {
+							'Attacking': 'tactical-attacking',
+							'Defending': 'tactical-defending',
+							'Transition Focus': 'tactical-transition',
+							'Fundamental': 'technical-fundamental',
+							'Execution': 'technical-execution',
+							'Decision Making': 'technical-decision',
+							'Speed': 'physical-speed',
+							'Agility': 'physical-agility',
+							'Coordination': 'physical-coordination',
+							'Endurance': 'physical-endurance',
+							'Communication': 'social-communication',
+							'Confidence': 'social-confidence',
+							'Leadership': 'social-leadership',
+							'Teamwork': 'social-teamwork'
+						};
+						return mapping[metricName];
+					}
+
+					// Complete updateRadarChart function - copy from your main code
+					function updateRadarChart() {
+						const canvasElement = document.getElementById('skills-radar');
+						if (!canvasElement) {
+							console.error('Canvas not found');
+							return;
+						}
+						
+						const ctx = canvasElement.getContext('2d');
+						if (!ctx) {
+							console.error('Context not found');
+							return;
+						}
+						
+						// Ensure canvas has explicit dimensions with high DPI support
+						const container = canvasElement.parentElement;
+						const dpr = window.devicePixelRatio || 1;
+						const cssWidth = container.clientWidth || 280;
+						const cssHeight = 200;
+						
+						canvasElement.width = cssWidth * dpr;
+						canvasElement.height = cssHeight * dpr;
+						ctx.scale(dpr, dpr);
+						
+						canvasElement.style.width = cssWidth + 'px';
+						canvasElement.style.height = cssHeight + 'px';
+						
+						// Clear canvas
+						ctx.fillStyle = '#ffffff';
+						ctx.fillRect(0, 0, cssWidth, cssHeight);
+						
+						// Chart configuration
+						const centerX = cssWidth / 2;
+						const centerY = cssHeight / 2;
+						const maxRadius = 95;
+						const radiusScale = maxRadius / 5;
+						const sliceAngle = (Math.PI * 2) / 14;
+						
+						// Metrics with shortened labels
+						const metricsOrder = [
+							{ name: 'Attacking', short: 'Att.', category: 'tactical' },
+							{ name: 'Defending', short: 'Def.', category: 'tactical' },
+							{ name: 'Transition Focus', short: 'Trans.', category: 'tactical' },
+							{ name: 'Speed', short: 'Spd.', category: 'physical' },
+							{ name: 'Agility', short: 'Agi.', category: 'physical' },
+							{ name: 'Coordination', short: 'Coord.', category: 'physical' },
+							{ name: 'Endurance', short: 'End.', category: 'physical' },
+							{ name: 'Communication', short: 'Comm.', category: 'social' },
+							{ name: 'Confidence', short: 'Conf.', category: 'social' },
+							{ name: 'Leadership', short: 'Lead.', category: 'social' },
+							{ name: 'Teamwork', short: 'Team.', category: 'social' },
+							{ name: 'Fundamental', short: 'Fund.', category: 'technical' },
+							{ name: 'Execution', short: 'Exec.', category: 'technical' },
+							{ name: 'Decision Making', short: 'Dec.', category: 'technical' }
+						];
+						
+						const categoryColors = {
+							tactical: '#FFD700',
+							technical: '#FFE55C',
+							physical: '#FFA500',
+							social: '#FFED4E'
+						};
+						
+						// Get metric values from the print page
+						const values = metricsOrder.map((metric) => {
+							const inputId = getInputIdForMetric(metric.name);
+							const inputElement = document.getElementById(inputId);
+							const score = inputElement ? parseInt(inputElement.value) || 3 : 3;
+							return { ...metric, value: score };
+						});
+						
+						// Draw slices
+						values.forEach((metric, index) => {
+							const startAngle = index * sliceAngle - Math.PI / 2;
+							const endAngle = startAngle + sliceAngle;
+							const radius = metric.value * radiusScale;
+							const color = categoryColors[metric.category];
+							
+							ctx.beginPath();
+							ctx.moveTo(centerX, centerY);
+							ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+							ctx.lineTo(centerX, centerY);
+							ctx.closePath();
+							
+							ctx.fillStyle = color;
+							ctx.fill();
+							
+							ctx.strokeStyle = '#333333';
+							ctx.lineWidth = 0.8;
+							ctx.stroke();
+						});
+						
+						// Draw category borders
+						const categoryEndIndices = [2, 6, 10, 13];
+						const fixedBorderRadius = maxRadius + 5;
+						
+						categoryEndIndices.forEach((endIndex) => {
+							const borderIndex = (endIndex + 1) % 14;
+							const angle = (borderIndex * sliceAngle) - Math.PI / 2;
+							
+							const x1 = centerX + Math.cos(angle) * 2;
+							const y1 = centerY + Math.sin(angle) * 2;
+							const x2 = centerX + Math.cos(angle) * fixedBorderRadius;
+							const y2 = centerY + Math.sin(angle) * fixedBorderRadius;
+							
+							ctx.strokeStyle = '#333333';
+							ctx.lineWidth = 2;
+							ctx.beginPath();
+							ctx.moveTo(x1, y1);
+							ctx.lineTo(x2, y2);
+							ctx.stroke();
+						});
+						
+						// Draw metric labels
+						ctx.font = 'bold 10px Arial';
+						ctx.fillStyle = '#333333';
+						ctx.textAlign = 'center';
+						ctx.textBaseline = 'middle';
+						
+						values.forEach((metric, index) => {
+							const angle = (index * sliceAngle) + (sliceAngle / 2) - Math.PI / 2;
+							const labelRadius = 90;
+							const x = centerX + Math.cos(angle) * labelRadius;
+							const y = centerY + Math.sin(angle) * labelRadius;
+							
+							ctx.save();
+							ctx.translate(x, y);
+							ctx.fillText(metric.short, 0, 0);
+							ctx.restore();
+						});
+						
+						// Draw value numbers
+						ctx.font = 'bold 10px Arial';
+						ctx.fillStyle = '#333333';
+						
+						values.forEach((metric, index) => {
+							const angle = (index * sliceAngle) + (sliceAngle / 2) - Math.PI / 2;
+							const radius = 66;
+							const x = centerX + Math.cos(angle) * radius;
+							const y = centerY + Math.sin(angle) * radius;
+							
+							ctx.textAlign = 'center';
+							ctx.textBaseline = 'middle';
+							ctx.fillText(metric.value, x, y);
+						});
+						
+						console.log('✓ Chart rendered successfully in print view');
+					}
+					
+					// Trigger after page loads
+					window.addEventListener('load', function() {
+						setTimeout(updateRadarChart, 1000);
+					});
+				}
 			<\/script>
+
 		</body>
 		</html>`;
 
@@ -2994,12 +3476,7 @@
 				updateProgress();
 			});
 
-			const monthNameToIndex = {
-				'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
-				'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11,
-				'January': 0, 'February': 1, 'March': 2, 'April': 3, 'May': 4, 'June': 5,
-				'July': 6, 'August': 7, 'September': 8, 'October': 9, 'November': 10, 'December': 11
-			};
+			
 
 			playerSelect.addEventListener('change', () => {
 			  const index = playerSelect.value;
@@ -3204,6 +3681,19 @@
 				updateBeforeUnloadListener();
 			};
 			updateBeforeUnloadListener();
+
+
+
+
+					
+
+
+					if (positionInput) positionInput.addEventListener('change', updateContextTags);
+					if (ageGroupSelect) ageGroupSelect.addEventListener('change', updateContextTags);
+
+					// Initialise once (in case player is loaded from file)
+					updateContextTags();
+
 
 			// Initial setup
 			togglePlayerInput();
