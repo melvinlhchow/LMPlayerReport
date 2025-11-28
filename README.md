@@ -10,7 +10,7 @@
 生成球員報告的步驟
 
 1. 打開應用程式
-   - 在您的網頁瀏覽器中訪問已托管的應用程式：https://melvinlhchow.github.io/LMPlayerReport/index.html。
+   - 在您的網頁瀏覽器中訪問已托管的應用程式：https://melvinlhchow.github.io/LMPlayerReport/index.html 。
    - 無需本地設置，工具已可線上使用。
 
 2. 選擇數據輸入方式
