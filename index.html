@@ -2327,8 +2327,8 @@
 
 
 				let clubLogoHTML = clubLogoData 
-					? `<img src="${clubLogoData}" alt="Club Logo" class="w-24 h-auto max-h-24">`
-					: `<img src="${defaultClubLogoSVG}" alt="Club Logo" class="w-24 h-auto max-h-24">`;
+					? `<img src="${clubLogoData}" alt="Club Logo" class="w-28 h-auto max-h-28">`
+					: `<img src="${defaultClubLogoSVG}" alt="Club Logo" class="w-28 h-auto max-h-28">`;
 				let portraitHTML = portraitImageData 
 					? `<img src="${portraitImageData}" alt="Player Portrait" class="w-full h-full object-cover">` 
 					: '<div class="w-full h-full bg-gray-200 flex items-center justify-center"><span class="text-gray-500">No Photo</span></div>';
@@ -2349,8 +2349,8 @@
 							  <div class="flex flex-col items-center justify-center mb-2">
 								<div class="mb-2">
 								  ${clubLogoHTML.replace(
-									'style="max-width: 200px; height: auto;"',
-									'style="max-width: 100px; max-height: 100px; height: auto;"'
+									'style="max-width: 220px; height: auto;"',
+									'style="max-width: 150px; max-height: 150px; height: auto;"'
 								  )}
 								</div>
 								<h1 class="text-3xl font-bold text-primary text-center">
@@ -2669,7 +2669,7 @@
 				// Fix 3: Ensure club logo has proper size
 				printableHTML = printableHTML.replace(
 					/alt="Club Logo" class="w-full h-auto"/g,
-					'alt="Club Logo" style="max-width: 80px; max-height: 80px; width: auto; height: auto;"'
+					'alt="Club Logo" style="max-width: 150px; max-height: 150px; width: auto; height: auto;"'
 				);
 
 				// Fix 4: Force all grids to display as 2-column with inline styles
