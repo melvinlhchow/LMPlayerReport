@@ -2652,8 +2652,37 @@
 						? ((matchMinutesPlayed / totalMatchMinutes) * 100).toFixed(1)
 						: '0.0';
 
-								
-								
+				// ─────────────────────────────────────────────
+				// 2. Inject correct percentages into the HTML
+				//    so *printed* bars use these values
+				// ─────────────────────────────────────────────
+
+				// 2a. Update the numeric label for training rate (optional but consistent)
+				printableHTML = printableHTML.replace(
+					/(<span>Attendance Rate:<\/span><span>)(\d+(\.\d+)?%?)(<\/span>)/,
+					`$1${trainingAttendancePercentage}%$4`
+				);
+
+				// 2b. Update the numeric label for match minutes (optional but consistent)
+				printableHTML = printableHTML.replace(
+					/(<span>Minutes Played:<\/span><span>)([^<]+)(<\/span>)/,
+					`$1${matchMinutesPlayed} (${matchMinutesPercentage}%)$3`
+				);
+
+				// 2c. Force the first progress-fill (training) to use the recalculated width
+				//     Assumes the first progress bar in the report is the Training Attendance one
+				printableHTML = printableHTML.replace(
+					/(<div class="bg-gradient-to-r from-primary to-secondary h-2\.5 rounded-full progress-fill"[^>]*style=")[^"]*(">)/,
+					`$1--progress-width: ${trainingAttendancePercentage}%; width: ${trainingAttendancePercentage}%;$2`
+				);
+
+				// 2d. Force the second progress-fill (match) to use the recalculated width
+				//     We do a second replace on the remaining occurrence
+				printableHTML = printableHTML.replace(
+					/(<div class="bg-gradient-to-r from-primary to-secondary h-2\.5 rounded-full progress-fill"[^>]*style=")[^"]*(">)/,
+					`$1--progress-width: ${matchMinutesPercentage}%; width: ${matchMinutesPercentage}%;$2`
+				);				
+										
 				// Fix 1: Ensure portrait container has inline styles for print
 				printableHTML = printableHTML.replace(
 					/<div class="w-28 h-28 overflow-hidden rounded-full">/g,
